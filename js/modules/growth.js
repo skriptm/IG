@@ -27,6 +27,33 @@ App.register({
 
     html += app.card("Aktivität pro Session", '<div class="legend"><i style="background:var(--accent)"></i>Kommentare <i style="background:var(--blue)"></i>Likes <i style="background:var(--green)"></i>Neue Follower</div><div class="chart-box" id="ch-sessions"></div>');
 
+    // Ziel-Prognose
+    const goal = (d.cfg && d.cfg.goal) || s.goal || {};
+    if (goal.followers) {
+      const spanDays = Math.max(1, (new Date(lastS.ts.replace(" ", "T")) - new Date(first.ts.replace(" ", "T"))) / 864e5);
+      const perDay = gain / spanDays, left = goal.followers - lastS.followers;
+      const eta = perDay > 0 ? Math.ceil(left / perDay) : null;
+      const etaDate = eta != null ? new Date(Date.now() + eta * 864e5) : null;
+      const onTrack = goal.date && etaDate ? etaDate <= new Date(goal.date) : null;
+      html += app.card("Follower-Ziel",
+        '<div class="stats">' + app.stat("Ziel", app.num(goal.followers), goal.date ? "bis " + app.fmtDate(goal.date) : "") +
+        app.stat("Noch", app.num(Math.max(0, left)), app.d1(perDay) + " pro Tag") + "</div>" +
+        '<div style="margin-top:10px">' + Charts.meter(lastS.followers, goal.followers) + "</div>" +
+        app.note(left <= 0 ? "Ziel erreicht 🎉" : eta == null ? "Beim aktuellen Tempo nicht absehbar." : "Beim aktuellen Tempo erreicht am " + etaDate.toLocaleDateString("de-CH") + (onTrack == null ? "." : onTrack ? ", also rechtzeitig." : ", also später als geplant.")));
+    }
+
+    // Bringt das Skript Follower? (je Bereich)
+    const area = (via, block) => block === "follow" ? "Follows" : !via ? "Ohne Angabe" : via[0] === "@" ? "Hubs" : via[0] === "#" ? "Hashtags" : /^Feed/.test(via) ? "Startseite" : /^Gegenbesuch/.test(via) ? "Gegenbesuch" : /^(Merkliste|Kernliste|Friends|Following)$/.test(via) ? "Kernliste & Merkliste" : "Sonstiges";
+    const roi = {}; const get = (a) => roi[a] || (roi[a] = { area: a, comments: 0, conv: 0 });
+    s.activity.forEach((a) => { if (a.act === "comment") get(area(a.via, a.block)).comments++; });
+    s.conversions.forEach((c) => get(area(c.via, c.block)).conv++);
+    const roiRows = Object.values(roi).sort((a, b) => b.comments - a.comments);
+    if (roiRows.length) html += app.card("Bringt das Skript Follower?",
+      '<p class="lead">Seit Messbeginn <b>' + app.num(totalComments) + "</b> Kommentare, <b>" + app.num(s.sessions.reduce((a, x) => a + (x.new || 0), 0)) + "</b> neue Follower, davon <b>" + conv + "</b> direkt zurückführbar.</p>" +
+      '<div class="table-wrap"><table class="t"><thead><tr><th>Bereich</th><th>Kommentare</th><th>Follower</th><th>pro Follower</th></tr></thead><tbody>' +
+      roiRows.map((r) => "<tr><td>" + app.esc(r.area) + "</td><td>" + r.comments + "</td><td>" + r.conv + "</td><td>" + (r.conv ? app.d1(r.comments / r.conv) : "–") + "</td></tr>").join("") + "</tbody></table></div>" +
+      app.note("„pro Follower“ = wie viele Kommentare ein Bereich im Schnitt für einen neuen Follower braucht. Weniger ist besser."));
+
     if (s.conversions.length) {
       html += app.card("Conversions <span class=\"pill\">" + conv + "</span>", '<ul class="list">' + s.conversions.map((c) =>
         '<li><a href="' + app.profile(c.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(c.h) + '</b></a><span class="muted">über ' + app.esc(c.via || c.block || "–") + "</span><span class=\"right muted\">" + app.fmtDate(c.ts) + "</span></li>").join("") + "</ul>");

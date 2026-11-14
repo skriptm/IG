@@ -9,6 +9,8 @@ Läuft auf GitHub Pages: **https://skriptm.github.io/IG/**
   - `a=stats` → neueste `ig-stats-*.json` aus Drive („Instagram Growth/Stats“)
   - `a=mark` / `a=del` → Gegenbesuch vormerken bzw. entfernen
   - `a=reply` → startet „IG Offene Kommentare beantworten (Button)“
+  - `a=refresh` → fragt die 8 neuesten Posts samt Insights und Kommentaren direkt bei Instagram ab (Aktualisieren-Knopf / Ziehen)
+  - `a=cfg_get` / `a=cfg_set` (POST, Feld `d`) → Skill-Einstellungen im Make-Datenspeicher „IG Growth – Einstellungen“ (ID 209784)
 - **Zugangscode:** wird in der App unter „Mehr“ eingetragen und nur auf dem Gerät gespeichert. Er steht nicht in diesem Repo.
 - **Offline:** Der Service Worker (`sw.js`) speichert die App, die letzten Daten liegen im Gerätespeicher.
 

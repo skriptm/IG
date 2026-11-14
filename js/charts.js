@@ -82,5 +82,14 @@
   // Mini-Balken für Tabellen
   function meter(v, max, color) { const p = max ? Math.max(3, (v / max) * 100) : 0; return '<span class="meter"><i style="width:' + p + "%;background:" + (color || "var(--accent)") + '"></i></span>'; }
 
-  window.Charts = { ring, line, bars, meter };
+  // Sparkline (HTML-String)
+  function spark(vals) {
+    vals = vals.filter((v) => v != null && !isNaN(v)); if (vals.length < 2) return "";
+    const mn = Math.min(...vals), mx = Math.max(...vals), span = mx - mn || 1;
+    const pts = vals.map((v, i) => [(i / (vals.length - 1)) * 200, 42 - ((v - mn) / span) * 36]);
+    const l = "M" + pts.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L");
+    return '<svg class="chart spark" viewBox="0 0 200 46" preserveAspectRatio="none" width="100%" height="46" aria-hidden="true"><path d="' + l + ' L200 46 L0 46Z" fill="rgba(240,124,30,.14)"/><path class="draw" d="' + l + '" fill="none" stroke="#f07c1e" stroke-width="2"/></svg>';
+  }
+
+  window.Charts = { ring, line, bars, meter, spark };
 })();

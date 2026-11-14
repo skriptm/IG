@@ -273,7 +273,7 @@
       document.addEventListener("visibilitychange", () => { if (!document.hidden) this.load(); });
       this.pullToRefresh(); this.dust();
       this.load();
-      if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {});
+      if ("serviceWorker" in navigator) { const had = !!navigator.serviceWorker.controller; let done = false; navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !done) { done = true; location.reload(); } }); navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}); document.addEventListener("visibilitychange", () => { if (!document.hidden) navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {}); }); }
     },
     normalize
   };

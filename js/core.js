@@ -142,7 +142,7 @@
   /* ---------- App-Gerüst ---------- */
   const modules = [];
   const App = {
-    LS, esc, dec, num, d1, pct, signed, kv, localDay, today, daysAgo, fmtDate, rel, h, settings, call, stamp, OWN,
+    LS, esc, dec, num, d1, pct, signed, kv, localDay, toDate, today, daysAgo, fmtDate, rel, h, settings, call, stamp, OWN,
     data: null, current: null, busy: false,
     register(m) { modules.push(m); modules.sort((a, b) => (a.order || 99) - (b.order || 99)); },
 

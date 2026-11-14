@@ -5,11 +5,11 @@
 
   // Fortschrittsring
   function ring(value, goal, label, color) {
-    const p = goal ? Math.min(1, value / goal) : 0, r = 34, c = 2 * Math.PI * r;
-    return '<div class="ring" data-anim><svg viewBox="0 0 84 84" width="84" height="84">' +
+    const open = goal == null, p = open ? (value ? 1 : 0) : goal ? Math.min(1, value / goal) : 0, r = 34, c = 2 * Math.PI * r;
+    return '<div class="ring' + (!open && goal && value >= goal ? " full" : "") + '" data-anim style="--rc:' + color + '"><svg viewBox="0 0 84 84" width="84" height="84">' +
       '<circle cx="42" cy="42" r="' + r + '" class="ring-bg"/>' +
       '<circle cx="42" cy="42" r="' + r + '" class="ring-fg" style="stroke:' + color + ";stroke-dasharray:" + c + ";--off:" + c * (1 - p) + ";stroke-dashoffset:" + c + '"/>' +
-      '</svg><div class="ring-in"><b>' + App.num(value) + "</b><small>/" + App.num(goal) + "</small></div><div class=\"ring-l\">" + esc(label) + "</div></div>";
+      '</svg><div class="ring-in"><b class="cu" data-to="' + (Number(value) || 0) + '">0</b>' + (open ? "" : "<small>/" + App.num(goal) + "</small>") + "</div><div class=\"ring-l\">" + esc(label) + "</div></div>";
   }
 
   // Linien-/Flächenchart. points: [{x:label, y:number, tip}]

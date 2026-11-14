@@ -33,6 +33,7 @@ App.register({
     const k = App.kpi(d);
 
     // Session auf Knopfdruck + Tagesverbrauch
+    const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows");
     const ss = d.session || {}, st = ss.status || "";
     const running = (st === "gestartet" || st === "läuft") && app.daysAgo(ss.at) === 0 && (Date.now() - new Date(String(ss.at).replace(" ", "T"))) < 90 * 60e3;
     const stLine = st === "gestartet" && running ? '<span class="pill accent">● startet … ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
@@ -40,28 +41,33 @@ App.register({
       : st === "fertig" ? '<span class="pill">✓ zuletzt fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
       : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
       : '<span class="muted small">Noch keine Session über die App gestartet.</span>';
-    const dayCap = (cfg.limits && cfg.limits.day) || 40;
-    const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows");
-    let html = app.card("Engagement-Session",
+    const L = cfg.limits || {}, dayCap = L.day || 40, hourCap = L.hour || 10, followCap = L.follow_day || 5;
+    // Stundenbudget: Kommentare der letzten 60 Minuten (rollierend)
+    const hourTs = s ? s.activity.filter((a) => a.act === "comment" && a.ts).map((a) => app.toDate(a.ts).getTime()).filter((t) => !isNaN(t) && Date.now() - t < 3600e3).sort((x, y) => x - y) : [];
+    const usedH = Math.min(hourTs.length, hourCap);
+    const rounds = Math.max(todaySessions.length + (running ? 1 : 0), d.starts || 0);
+    const segs = Array.from({ length: hourCap }, (_, i) => '<i class="' + (i < usedH ? "on" : "") + '" style="--i:' + i + '"></i>').join("");
+    let html = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
       '<div style="margin-bottom:12px">' + stLine + "</div>" +
-      '<button class="btn primary" id="sess-start"' + (running || cfg.paused ? " disabled" : "") + ">" + (running ? "Session läuft …" : "▶︎ Session starten") + "</button>" +
-      '<div class="stats" style="margin-top:12px">' +
-        app.stat("Starts heute", app.num(d.starts), "über die App") +
-        app.stat("Kommentare", app.num(usedC) + '<small class="muted" style="font-size:14px"> / ' + dayCap + "</small>", Charts.meter(usedC, dayCap)) +
-        app.stat("Likes", app.num(usedL), "heute vergeben") +
-        app.stat("Follows", app.num(usedF), "heute") +
+      '<button class="btn primary shine' + (running ? " busy" : "") + '" id="sess-start"' + (running || cfg.paused ? " disabled" : "") + ">" + (running ? "Session läuft …" : "▶︎ Session starten") + "</button>" +
+      '<div class="hourbox' + (usedH >= hourCap ? " full" : "") + '">' +
+        '<div class="hb-top"><span class="stat-l">Diese Stunde</span><span class="hb-v"><b class="cu" data-to="' + usedH + '">0</b><small> / ' + hourCap + " Kommentare</small></span></div>" +
+        '<div class="segs">' + segs + "</div>" +
+        '<div class="hb-sub" id="hb-sub"></div>' +
       "</div>" +
-      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Jeder Start ist eine volle Runde auf dem Windows-Laptop. Sicherheitsnetz: max. " + dayCap + " Kommentare am Tag und 10 pro Stunde, danach nur noch Likes. Zahlen aus den beendeten Sessions."), { id: "session" });
+      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Jeder Start ist eine volle Runde auf dem Windows-Laptop. Sicherheitsnetz: " + dayCap + " Kommentare am Tag, " + hourCap + " pro Stunde, danach nur noch Likes."), { id: "session" });
 
+    const newF = sum("new");
     html += app.card("Heute",
       '<div class="rings">' +
-        Charts.ring(sum("comments"), dayGoal, "Kommentare", "var(--accent)") +
-        Charts.ring(sum("likes"), g.likes, "Likes", "var(--sand)") +
-        Charts.ring(sum("new"), g.newFollowers, "Neue Follower", "var(--green)") +
+        Charts.ring(usedC, dayCap, "Kommentare", "var(--accent)") +
+        Charts.ring(usedL, null, "Likes", "var(--sand)") +
+        Charts.ring(usedF, followCap, "Follows", "var(--blue)") +
       "</div>" +
+      '<div class="gain' + (newF ? " pos" : "") + '"><span class="g-ic">' + (newF ? "✦" : "·") + '</span><span><b class="cu" data-to="' + newF + '">0</b> neue Follower heute</span><small>Ergebnis</small></div>' +
       '<div class="streak"><span class="flame">' + (streak ? "🔥" : "🌫️") + '</span><div style="flex:1"><b>' + streak + "</b> " + (streak === 1 ? "Tag" : "Tage") + " Streak" +
-      "<small>" + (todaySessions.length ? todaySessions.length + " Session(s) heute" : "Heute noch keine Session") + "</small>" +
-      '<div class="days">' + week.map((on) => "<i" + (on ? ' class="on"' : "") + "></i>").join("") + "</div></div></div>" +
+      "<small>aktiv an " + week.filter(Boolean).length + " von 7 Tagen</small>" +
+      '<div class="days">' + week.map((on, i) => "<i" + (on ? ' class="on"' : "") + ' style="--i:' + i + '"></i>').join("") + "</div></div></div>" +
       (d.statsError ? '<p class="note">⚠️ ' + app.esc(d.statsError) + "</p>" : ""));
 
     // Zu tun + Ticker
@@ -101,6 +107,20 @@ App.register({
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
       '<div class="stats mini">' + app.stat("Reichweite", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>");
     el.innerHTML = html;
+    el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));
+
+    // Stunden-Countdown, läuft live mit
+    clearInterval(App._hourTimer);
+    const hbSub = el.querySelector("#hb-sub");
+    const tickHour = () => {
+      if (!hbSub || !document.body.contains(hbSub)) return clearInterval(App._hourTimer);
+      const live = hourTs.filter((t) => Date.now() - t < 3600e3), free = hourCap - Math.min(live.length, hourCap);
+      const mins = (t) => Math.max(1, Math.ceil((t + 3600e3 - Date.now()) / 60e3));
+      if (!live.length) hbSub.innerHTML = '<span class="ok">● volles Stundenbudget</span>';
+      else if (free <= 0) hbSub.innerHTML = '<span class="warn">● voll</span> · nächster Kommentar in <b>' + mins(live[live.length - hourCap]) + " min</b>";
+      else hbSub.innerHTML = '<span class="ok">● noch ' + free + " frei</span> · ältester fällt raus in " + mins(live[0]) + " min";
+    };
+    tickHour(); App._hourTimer = setInterval(tickHour, 30e3);
 
     const sb = el.querySelector("#sess-start");
     if (sb) sb.onclick = async () => {

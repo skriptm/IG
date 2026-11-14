@@ -1,7 +1,7 @@
 /* Grundeinstellungen der App. Der Zugangscode steht bewusst NICHT hier,
    er wird beim ersten Start in der App eingegeben und nur auf dem Gerät gespeichert. */
 window.CONFIG = {
-  version: "1.1.0",
+  version: "1.2.0",
   account: "andrelauinger",
   api: "https://hook.eu2.make.com/vevi8zj183hcicg9lq8rai3oekbok6wq",
   // Standard-Ziele (in den Einstellungen änderbar)

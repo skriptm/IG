@@ -134,7 +134,7 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, contacts, stats, cfg, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    return { posts, insights, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }
@@ -161,13 +161,14 @@
           this.toast("Instagram wird abgefragt …", "", 0);
           try { await call({ a: "refresh" }, 90000); } catch (e) { if (e.code === 403) throw e; this.toast("Instagram nicht erreichbar, zeige gespeicherte Daten", "bad"); }
         }
-        const [all, stats, cfg] = await Promise.allSettled([call({ a: "all" }), call({ a: "stats" }, 30000), call({ a: "cfg_get" }, 30000)]);
+        const [all, stats, cfg, sess] = await Promise.allSettled([call({ a: "all" }), call({ a: "stats" }, 30000), call({ a: "cfg_get" }, 30000), call({ a: "sess_get" }, 30000)]);
         if (all.status === "rejected") throw all.reason;
         const raw = all.value;
         if (stats.status === "fulfilled" && stats.value && stats.value.sessions) raw.stats = stats.value;
         else raw.statsError = stats.status === "rejected" ? "Drive-Statistik nicht erreichbar" : "Noch keine Drive-Statistik";
         if (cfg.status === "fulfilled" && cfg.value && typeof cfg.value === "object" && Object.keys(cfg.value).length) raw.cfg = cfg.value;
         else { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); if (old && old.cfg) raw.cfg = old.cfg; }
+        if (sess.status === "fulfilled" && sess.value) raw.session = sess.value;
         LS.set("cache", raw);
         this.data = normalize(raw);
         if (deep) this.toast("Aktuell ✓");

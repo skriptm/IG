@@ -32,7 +32,24 @@ App.register({
     const gbOpen = d.contacts.filter((c) => !c.marked).length, gbQ = d.contacts.filter((c) => c.marked).length;
     const k = App.kpi(d);
 
-    let html = app.card("Heute",
+    // Session auf Knopfdruck
+    const ss = d.session || {}, st = ss.status || "";
+    const nextCheck = () => { const n = new Date(); const t = new Date(n); t.setMinutes(8, 0, 0); if (t <= n) t.setHours(t.getHours() + 1);
+      if (t.getHours() < 7) t.setHours(7, 8); if (t.getHours() > 21) { t.setDate(t.getDate() + 1); t.setHours(7, 8); }
+      return t.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" }) + (t.getDate() !== n.getDate() ? " (morgen)" : ""); };
+    const stLine = st === "angefordert" ? '<span class="pill accent">angefordert ' + app.esc(String(ss.at || "").slice(11)) + '</span> <span class="muted small">startet um ' + nextCheck() + "</span>"
+      : st === "läuft" ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
+      : st === "fertig" ? '<span class="pill">✓ fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? ' <span class="muted small">' + app.esc(ss.summary) + "</span>" : "")
+      : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? ' <span class="muted small">' + app.esc(ss.summary) + "</span>" : "")
+      : '<span class="muted small">Noch keine Session über die App gestartet.</span>';
+    const busySess = st === "angefordert" || st === "läuft";
+    let html = app.card("Engagement-Session",
+      '<div style="margin-bottom:12px">' + stLine + "</div>" +
+      (st === "angefordert" ? '<div class="btnrow"><button class="btn" id="sess-cancel">Anforderung zurückziehen</button></div>'
+        : '<button class="btn primary" id="sess-start"' + (busySess || cfg.paused ? " disabled" : "") + ">▶︎ Session starten</button>") +
+      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Läuft auf dem Windows-Laptop. Die Session startet bei der nächsten Nachschau (stündlich um :08, 7–21 Uhr) und hält sich an alle Limits."), { id: "session" });
+
+    html += app.card("Heute",
       '<div class="rings">' +
         Charts.ring(sum("comments"), dayGoal, "Kommentare", "var(--accent)") +
         Charts.ring(sum("likes"), g.likes, "Likes", "var(--sand)") +
@@ -80,6 +97,15 @@ App.register({
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
       '<div class="stats mini">' + app.stat("Reichweite", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>");
     el.innerHTML = html;
+
+    const setSess = async (q, msg) => {
+      try { await app.call({ a: "sess_set", q }); d.session = q ? { req: q, status: "angefordert", at: app.stamp() } : { status: "abgebrochen", at: app.stamp() };
+        const raw = app.LS.get("cache", null); if (raw) { raw.session = d.session; app.LS.set("cache", raw); }
+        app.toast(msg); app.render(); }
+      catch (err) { app.toast("Nicht gespeichert: " + err.message, "bad"); }
+    };
+    const sb = el.querySelector("#sess-start"); if (sb) sb.onclick = () => { if (confirm("Engagement-Session anfordern? Sie startet um " + nextCheck() + " auf dem Laptop.")) setSess(app.stamp(), "Session angefordert ✓ – Start um " + nextCheck()); };
+    const sc = el.querySelector("#sess-cancel"); if (sc) sc.onclick = () => setSess("", "Anforderung zurückgezogen");
 
     el.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); app.go(a.dataset.go, a.dataset.anchor); }));
     el.querySelector("#act-reply").onclick = async (e) => {

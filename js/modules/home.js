@@ -32,22 +32,26 @@ App.register({
     const gbOpen = d.contacts.filter((c) => !c.marked).length, gbQ = d.contacts.filter((c) => c.marked).length;
     const k = App.kpi(d);
 
-    // Session auf Knopfdruck
+    // Session auf Knopfdruck + Tagesverbrauch
     const ss = d.session || {}, st = ss.status || "";
-    const nextCheck = () => { const n = new Date(); const t = new Date(n); t.setMinutes(8, 0, 0); if (t <= n) t.setHours(t.getHours() + 1);
-      if (t.getHours() < 7) t.setHours(7, 8); if (t.getHours() > 21) { t.setDate(t.getDate() + 1); t.setHours(7, 8); }
-      return t.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" }) + (t.getDate() !== n.getDate() ? " (morgen)" : ""); };
-    const stLine = st === "angefordert" ? '<span class="pill accent">angefordert ' + app.esc(String(ss.at || "").slice(11)) + '</span> <span class="muted small">startet um ' + nextCheck() + "</span>"
-      : st === "läuft" ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
-      : st === "fertig" ? '<span class="pill">✓ fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? ' <span class="muted small">' + app.esc(ss.summary) + "</span>" : "")
-      : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? ' <span class="muted small">' + app.esc(ss.summary) + "</span>" : "")
+    const running = (st === "gestartet" || st === "läuft") && app.daysAgo(ss.at) === 0 && (Date.now() - new Date(String(ss.at).replace(" ", "T"))) < 90 * 60e3;
+    const stLine = st === "gestartet" && running ? '<span class="pill accent">● startet … ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
+      : st === "läuft" && running ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
+      : st === "fertig" ? '<span class="pill">✓ zuletzt fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
+      : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
       : '<span class="muted small">Noch keine Session über die App gestartet.</span>';
-    const busySess = st === "angefordert" || st === "läuft";
+    const dayCap = (cfg.limits && cfg.limits.day) || 40;
+    const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows");
     let html = app.card("Engagement-Session",
       '<div style="margin-bottom:12px">' + stLine + "</div>" +
-      (st === "angefordert" ? '<div class="btnrow"><button class="btn" id="sess-cancel">Anforderung zurückziehen</button></div>'
-        : '<button class="btn primary" id="sess-start"' + (busySess || cfg.paused ? " disabled" : "") + ">▶︎ Session starten</button>") +
-      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Läuft auf dem Windows-Laptop. Die Session startet bei der nächsten Nachschau (stündlich um :08, 7–21 Uhr) und hält sich an alle Limits."), { id: "session" });
+      '<button class="btn primary" id="sess-start"' + (running || cfg.paused ? " disabled" : "") + ">" + (running ? "Session läuft …" : "▶︎ Session starten") + "</button>" +
+      '<div class="stats" style="margin-top:12px">' +
+        app.stat("Starts heute", app.num(d.starts), "über die App") +
+        app.stat("Kommentare", app.num(usedC) + '<small class="muted" style="font-size:14px"> / ' + dayCap + "</small>", Charts.meter(usedC, dayCap)) +
+        app.stat("Likes", app.num(usedL), "heute vergeben") +
+        app.stat("Follows", app.num(usedF), "heute") +
+      "</div>" +
+      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Jeder Start ist eine volle Runde auf dem Windows-Laptop. Sicherheitsnetz: max. " + dayCap + " Kommentare am Tag und 10 pro Stunde, danach nur noch Likes. Zahlen aus den beendeten Sessions."), { id: "session" });
 
     html += app.card("Heute",
       '<div class="rings">' +
@@ -98,14 +102,18 @@ App.register({
       '<div class="stats mini">' + app.stat("Reichweite", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>");
     el.innerHTML = html;
 
-    const setSess = async (q, msg) => {
-      try { await app.call({ a: "sess_set", q }); d.session = q ? { req: q, status: "angefordert", at: app.stamp() } : { status: "abgebrochen", at: app.stamp() };
-        const raw = app.LS.get("cache", null); if (raw) { raw.session = d.session; app.LS.set("cache", raw); }
-        app.toast(msg); app.render(); }
-      catch (err) { app.toast("Nicht gespeichert: " + err.message, "bad"); }
+    const sb = el.querySelector("#sess-start");
+    if (sb) sb.onclick = async () => {
+      if (!confirm("Jetzt eine Engagement-Session auf dem Laptop starten?")) return;
+      sb.disabled = true; sb.textContent = "Starte …";
+      try {
+        const r = await app.call({ a: "start" }, 40000);
+        if (r.ok) { d.session = { status: "gestartet", at: app.stamp() }; d.starts = (d.starts || 0) + 1; app.toast("Session gestartet ✓ – Ergebnis kommt per Push"); }
+        else { d.session = { status: "fehler", at: app.stamp(), summary: r.code === 401 ? "Start-Token fehlt oder ist ungültig (Make)" : "Claude hat den Start abgelehnt (Code " + r.code + ")" }; app.toast("Start fehlgeschlagen", "bad"); }
+        const raw = app.LS.get("cache", null); if (raw) { raw.session = d.session; raw.starts = app.localDay(new Date()) + "|" + d.starts; app.LS.set("cache", raw); }
+      } catch (err) { app.toast("Start fehlgeschlagen: " + err.message, "bad"); }
+      app.render();
     };
-    const sb = el.querySelector("#sess-start"); if (sb) sb.onclick = () => { if (confirm("Engagement-Session anfordern? Sie startet um " + nextCheck() + " auf dem Laptop.")) setSess(app.stamp(), "Session angefordert ✓ – Start um " + nextCheck()); };
-    const sc = el.querySelector("#sess-cancel"); if (sc) sc.onclick = () => setSess("", "Anforderung zurückgezogen");
 
     el.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); app.go(a.dataset.go, a.dataset.anchor); }));
     el.querySelector("#act-reply").onclick = async (e) => {

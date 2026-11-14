@@ -134,7 +134,7 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    return { posts, insights, contacts, stats, cfg, session: raw.session || {}, starts: (() => { const [dd, n] = String(raw.starts || "").split("|"); return dd === localDay(new Date()) ? Number(n) || 0 : 0; })(), cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }
@@ -168,7 +168,7 @@
         else raw.statsError = stats.status === "rejected" ? "Drive-Statistik nicht erreichbar" : "Noch keine Drive-Statistik";
         if (cfg.status === "fulfilled" && cfg.value && typeof cfg.value === "object" && Object.keys(cfg.value).length) raw.cfg = cfg.value;
         else { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); if (old && old.cfg) raw.cfg = old.cfg; }
-        if (sess.status === "fulfilled" && sess.value) raw.session = sess.value;
+        if (sess.status === "fulfilled" && sess.value) { raw.session = sess.value.session || {}; raw.starts = sess.value.starts || ""; }
         LS.set("cache", raw);
         this.data = normalize(raw);
         if (deep) this.toast("Aktuell ✓");

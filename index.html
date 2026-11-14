@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IG Growth">
+<title>IG Growth</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+  <header class="hero" id="hero">
+    <svg class="hero-mountains" viewBox="0 0 400 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b232c"/><stop offset="1" stop-color="#0b0d10"/></linearGradient>
+        <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3440"/><stop offset="1" stop-color="#11161c"/></linearGradient>
+        <linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18202a"/><stop offset="1" stop-color="#0b0d10"/></linearGradient>
+      </defs>
+      <rect width="400" height="160" fill="url(#sky)"/>
+      <circle cx="318" cy="46" r="18" fill="#f07c1e" opacity=".18"/>
+      <path d="M0 120 L60 70 L95 95 L150 40 L205 100 L250 62 L300 105 L345 58 L400 96 L400 160 L0 160Z" fill="url(#m1)"/>
+      <path d="M150 40 L162 52 L150 50 L140 56Z M345 58 L355 70 L344 67 L336 72Z" fill="#cfd8e0" opacity=".25"/>
+      <path d="M0 140 L48 110 L110 132 L170 98 L240 136 L300 112 L360 134 L400 118 L400 160 L0 160Z" fill="url(#m2)"/>
+    </svg>
+    <div class="fog f1"></div><div class="fog f2"></div>
+    <div class="hero-content">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow">@andrelauinger</div>
+          <h1 id="hero-title">IG Growth</h1>
+        </div>
+        <button class="icon-btn" id="refresh-btn" aria-label="Aktualisieren">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="hero-sub" id="hero-sub">Lädt …</div>
+    </div>
+  </header>
+
+  <main id="view" class="view"></main>
+
+  <nav class="tabbar" id="tabbar"></nav>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/modules/home.js"></script>
+<script src="js/modules/growth.js"></script>
+<script src="js/modules/content.js"></script>
+<script src="js/modules/contacts.js"></script>
+<script src="js/modules/settings.js"></script>
+<script>App.start();</script>
+</body>
+</html>

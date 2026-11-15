@@ -43,9 +43,7 @@
   /* ---------- lokale App-Einstellungen ---------- */
   const settings = {
     get code() { return LS.get("code", ""); },
-    set code(v) { LS.set("code", v); },
-    get goals() { return Object.assign({}, CONFIG.goals, LS.get("goals", {})); },
-    set goals(v) { LS.set("goals", v); }
+    set code(v) { LS.set("code", v); }
   };
 
   /* ---------- Make-Schnittstelle ---------- */

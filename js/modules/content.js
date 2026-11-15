@@ -27,7 +27,7 @@ App.register({
     const sorts = { signal: "Saves+Shares", reach: "Reichweite", er: "Engagement", ts: "Neueste" };
     html += app.card("Content-Ranking",
       '<div class="seg" id="seg">' + Object.entries(sorts).map(([kk, v]) => '<button data-k="' + kk + '" class="' + (me.state.sort === kk ? "on" : "") + '">' + v + "</button>").join("") + "</div>" +
-      '<ol class="ranking" id="ranking"></ol>', { tip: "Blass = jünger als 48 Std., die Zahlen wachsen noch." });
+      '<div id="ranking"></div>', { tip: "Blass = jünger als 48 Std., die Zahlen wachsen noch." });
 
     // Formate & Captions
     const group = (key) => { const m = {}; posts.filter((p) => !p.young && p.reach).forEach((p) => (m[p[key]] = m[p[key]] || []).push(p));
@@ -67,11 +67,11 @@ App.register({
     const draw = () => {
       const kk = me.state.sort, arr = posts.slice().sort((a, b) => (kk === "ts" ? (a.ts < b.ts ? 1 : -1) : (b[kk] ?? -1) - (a[kk] ?? -1)));
       const mx = Math.max(1, ...arr.map((p) => p.reach));
-      list.innerHTML = arr.map((p, i) =>
+      list.innerHTML = app.more(arr.map((p, i) =>
         '<li class="' + (p.young ? "young" : "") + '"><a href="' + app.esc(p.link) + '" target="_blank" rel="noopener"><span class="rank">' + (i + 1) + "</span>" +
         '<div class="rk-main"><div class="rk-top"><span class="tag">' + p.format + '</span> <span class="tag sand">' + p.captionType + "</span> " + app.fmtDate(p.ts) + "</div>" +
         '<div class="rk-cap">' + app.esc((p.caption.split("\n")[0] || "Ohne Caption").slice(0, 70)) + "</div>" + Charts.meter(p.reach, mx) +
-        '<div class="rk-nums">👁 ' + app.num(p.reach) + " · ♥ " + app.num(p.likes) + " · 💬 " + app.num(p.comments) + " · 🔖 " + app.num(p.saves) + " · ↗ " + app.num(p.shares) + " · " + app.d1(p.signal) + "/1.000</div></div></a></li>").join("");
+        '<div class="rk-nums">👁 ' + app.num(p.reach) + " · ♥ " + app.num(p.likes) + " · 💬 " + app.num(p.comments) + " · 🔖 " + app.num(p.saves) + " · ↗ " + app.num(p.shares) + " · " + app.d1(p.signal) + "/1.000</div></div></a></li>"), 5, "ranking");
     };
     draw();
     el.querySelector("#seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; me.state.sort = b.dataset.k; el.querySelectorAll("#seg button").forEach((x) => x.classList.toggle("on", x === b)); draw(); });

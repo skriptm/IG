@@ -3,7 +3,7 @@ App.register({
   id: "settings", title: "Einstellungen", order: 9, needsData: false,
   icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   tab: "basis", draft: null, base: null,
-  TABS: [["basis", "Basis"], ["accounts", "Accounts"], ["hashtags", "Hashtags"], ["limits", "Limits & Zeiten"], ["ziel", "Ziel & Stil"], ["merkliste", "Merkliste"], ["app", "App"]],
+  TABS: [["basis", "Basis"], ["accounts", "Accounts"], ["hashtags", "Hashtags"], ["limits", "Limits & Zeiten"], ["ziel", "Ziel & Stil"], ["app", "App"]],
   LIMITS: [["day", "Kommentare / Tag"], ["hour", "Kommentare / Std."], ["follow_day", "Follows / Tag"], ["follow_session", "Follows / Session"], ["follow_min", "Folgen ab Followern"], ["engage_min", "Engagement ab Foll."], ["engage_max", "Engagement bis Foll."]],
   BUDGET: [["core", "Kernliste"], ["feed", "Startseite"], ["hubs", "Hubs"], ["hashtags", "Hashtags"]],
 
@@ -71,10 +71,6 @@ App.register({
     if (me.tab === "ziel") {
       html += app.card("Follower-Ziel", '<div class="grid2">' + numf("goal.followers", "Ziel (Follower)", c.goal.followers || "") + '<label class="field"><span>Bis wann</span><input type="date" data-date="goal.date" value="' + app.esc(c.goal.date || "") + '"></label></div>', { tip: "Der Wachstum-Tab rechnet aus deinem Tempo hoch, wann du es erreichst." });
       html += app.card("Beispielkommentare", chips("examples", "") + adder("examples", "z. B. wo stand der Van da? 😮‍💨"), { tip: "So klingst du. Der Skill nimmt sie als Vorbild für Ton und Länge, kopiert sie aber nicht." });
-      html += app.card("Top-Fans automatisch merken", '<div class="switchrow"><span>' + (c.fans_to_watchlist ? "An" : "Aus") + "</span>" + sw("fans_to_watchlist", c.fans_to_watchlist) + "</div>", { tip: "Wer oft bei dir kommentiert, aber 14 Tage nichts von dir bekommen hat, landet auf der Merkliste." });
-    }
-    if (me.tab === "merkliste") {
-      html += app.card("Merkliste <span class=\"pill\">" + c.watchlist.length + "</span>", chips("watchlist", "@") + adder("watchlist", "@handle oder Profil-Link"), { tip: "Die nächste Session besucht sie zuerst (liken + kommentieren) und nimmt sie danach von der Liste." });
     }
     if (me.tab === "app") {
       const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
@@ -92,14 +88,14 @@ App.register({
       tag: (v) => { const x = String(v || "").trim().replace(/^#/, "").toLowerCase(); return /^[\p{L}\p{N}_]{1,60}$/u.test(x) ? x : null; },
       text: (max) => (v) => { const x = String(v || "").trim(); return x && x.length <= max ? x : null; }
     };
-    const rule = { nogo: [clean.handle, true], friends: [clean.handle, true], hubs: [clean.handle, true], watchlist: [clean.handle, true], hashtags: [clean.tag, true], taboo: [clean.text(60), false], examples: [clean.text(140), false] };
+    const rule = { nogo: [clean.handle, true], friends: [clean.handle, true], hubs: [clean.handle, true], hashtags: [clean.tag, true], taboo: [clean.text(60), false], examples: [clean.text(140), false] };
     pane.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { c[b.dataset.del].splice(Number(b.dataset.i), 1); changed(); });
     const add = (key) => {
       const inp = pane.querySelector('[data-add="' + key + '"]'); const [fn, split] = rule[key];
       const parts = split ? inp.value.split(/[\s,;]+/).filter(Boolean) : [inp.value.trim()].filter(Boolean); if (!parts.length) return;
       const bad = [];
       parts.forEach((p) => { const v = fn(p); if (!v) return bad.push(p); if (c[key].includes(v)) return;
-        const clash = key !== "nogo" && key !== "watchlist" && ["friends", "hubs", "nogo"].filter((o) => o !== key).find((o) => c[o].includes(v));
+        const clash = key !== "nogo" && ["friends", "hubs", "nogo"].filter((o) => o !== key).find((o) => c[o].includes(v));
         if (clash) return bad.push(p + " (steht schon bei " + ({ friends: "Kernliste", hubs: "Hubs", nogo: "No-Go" })[clash] + ")");
         c[key].push(v); });
       changed();
@@ -129,7 +125,8 @@ App.register({
     bar.querySelector("#sb-undo").onclick = () => { me.draft = me.norm(me.base); app.editing = false; me.pane(el, app.data, app); };
     bar.querySelector("#sb-save").onclick = async (e) => {
       const b = e.currentTarget; b.disabled = true; b.textContent = "Speichere …";
-      try { const saved = await app.saveCfg(me.draft); me.base = me.norm(saved); me.draft = me.norm(saved); app.editing = false; app.renderHero(); me.pane(el, app.data, app); app.toast("Gespeichert ✓ – gilt ab der nächsten Session"); }
+      try { const cur = (app.data && app.data.cfg) || {}; if (Array.isArray(cur.watchlist)) me.draft.watchlist = cur.watchlist.slice(); if (typeof cur.fans_to_watchlist === "boolean") me.draft.fans_to_watchlist = cur.fans_to_watchlist;
+        const saved = await app.saveCfg(me.draft); me.base = me.norm(saved); me.draft = me.norm(saved); app.editing = false; app.renderHero(); me.pane(el, app.data, app); app.toast("Gespeichert ✓ – gilt ab der nächsten Session"); }
       catch (err) { b.disabled = false; b.textContent = "Speichern"; app.toast("Nicht gespeichert: " + err.message, "bad"); }
     };
   }

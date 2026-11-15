@@ -7,6 +7,8 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 ## Bewusste Entscheidungen (nicht rückgängig machen)
 - Kein Knopf „Session starten“ in der App, bewusst entfernt. Sessions startet André im Claude-Chat.
 - Instagram-Daten werden nur auf Tippen auf ↻ neu abgefragt, nicht automatisch.
+- Entfernte Funktionen werden immer komplett aus dem Code gelöscht (kein toter Code).
+- Merkliste und Gegenbesuch-Warteschlange sind eine gemeinsame Liste „Als Nächstes besuchen“ im Reiter Kontakte.
 - Moody-Cinematic-Look (dunkel, Glas-Karten, Orange als Akzent).
 
 ## Fahrplan (Schritt für Schritt, nach jedem Schritt anschauen)
@@ -15,10 +17,15 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 3. Reiter für Reiter neu ordnen, beginnend mit der Übersicht
 
 ## Offene Fragen an André
-- Merkliste (Einstellungen) und Warteschlange (Kontakte) unter Kontakte zusammenführen?
-- Content-Ranking auf Top 5 + „Alle anzeigen“ kürzen?
+- keine
 
 ## Verlauf
+
+### 15.11.2026 – v1.6.0
+- Kontakte: Merkliste und Warteschlange zusammengeführt zur Karte „Als Nächstes besuchen“ (Pill „Gegenbesuch“ oder „Merkliste“, Feld zum Hinzufügen, Schalter „Top-Fans automatisch hinzufügen“). Merkliste wird weiter in der Skill-Konfiguration (Make) gespeichert.
+- Einstellungen: Unterreiter „Merkliste“ und Karte „Top-Fans“ entfernt. Beim Speichern der Einstellungen wird die aktuelle Merkliste übernommen, damit nichts überschrieben wird.
+- Content-Ranking: Top 5, Rest hinter „Alle anzeigen“.
+- Toter Code entfernt: Tagesziele (CONFIG.goals, settings.goals), ungenutzte CSS-Klasse .advice.
 
 ### 15.11.2026 – v1.5.1
 - Fix: ⓘ-Erklärungen wurden nicht angezeigt (CSS-Klasse `.tip` kollidierte mit dem Diagramm-Tooltip, jetzt `.card-tip`).

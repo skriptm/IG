@@ -18,8 +18,7 @@ App.register({
   id: "home", title: "Übersicht", order: 1,
   icon: '<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
   render(el, d, app) {
-    const g = app.settings.goals, s = d.stats, T = app.today(), cfg = d.cfg || {};
-    const dayGoal = (cfg.limits && cfg.limits.day) || g.comments;
+    const s = d.stats, T = app.today(), cfg = d.cfg || {};
     const todaySessions = s ? s.sessions.filter((x) => app.localDay(x.ts) === T) : [];
     const sum = (k) => todaySessions.reduce((a, x) => a + (x[k] || 0), 0);
     const commentDays = new Set(s ? s.activity.filter((a) => a.act === "comment").map((a) => String(a.ts).slice(0, 10)) : []);

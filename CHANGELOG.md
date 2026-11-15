@@ -13,13 +13,28 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 
 ## Fahrplan (Schritt für Schritt, nach jedem Schritt anschauen)
 1. Aufräumen: Doppeltes und zu viele Texte raus ✅ (15.11.)
-2. Neue Growth-Kennzahlen: Netto-Follower pro Woche, Vergleich mit der Vorwoche, Funnel Reichweite → Profilaufrufe → Follows, Reels-Views/Wiedergabedauer, nächster geplanter Post
-3. Reiter für Reiter neu ordnen, beginnend mit der Übersicht
+2. Neue Growth-Kennzahlen A+B: „Diese Woche“, Netto-Follower pro Tag, Funnel ✅ (15.11.)
+3. Reels: durchschnittliche Wiedergabedauer (eigener Reels-Zweig im Make-Szenario „Posts & Kommentare sammeln“) – als Nächstes
+4. Reiter für Reiter neu ordnen, beginnend mit der Übersicht
+- Geparkt: „Nächster geplanter Post“ – erst möglich, wenn es in Make ein Szenario zum automatischen Posten gibt.
 
 ## Offene Fragen an André
 - keine
 
+## Make-Szenarien (Team 1047609)
+- IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get.
+- IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
+- IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, Data Store 208242.
+- IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
+
 ## Verlauf
+
+### 15.11.2026 – v1.7.0 (Growth-Kennzahlen A+B)
+- Übersicht: neue Karte „Diese Woche“ (Netto-Follower, Reichweite organisch, Interaktionen, Profilaufrufe; Vergleich mit Vorwoche, sobald 14 Tage Daten da sind, ca. ab 25.11.).
+- Wachstum: oben „Netto-Follower pro Tag“ (grün/rot um die Nulllinie) und „Funnel“ (Nicht-Follower erreicht → Profilaufrufe → neue Follower).
+- Make: Konto-Insights sammelt zusätzlich profile_views (getestet, funktioniert).
+- Make: Zweig „Session starten“ samt Zähler aus „IG App API“ gelöscht, Datensatz „starts“ entfernt. App: Zähler „starts“ und Status „gestartet“ aus dem Code entfernt. „x Runden heute“ zählt jetzt nur noch Sessions aus der Statistik.
+- Tage ohne Follow-Daten (z. B. ein Lauf mitten am Tag) zählen nicht als 0.
 
 ### 15.11.2026 – v1.6.0
 - Kontakte: Merkliste und Warteschlange zusammengeführt zur Karte „Als Nächstes besuchen“ (Pill „Gegenbesuch“ oder „Merkliste“, Feld zum Hinzufügen, Schalter „Top-Fans automatisch hinzufügen“). Merkliste wird weiter in der Skill-Konfiguration (Make) gespeichert.

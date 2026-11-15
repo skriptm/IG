@@ -1,12 +1,12 @@
-/* Wachstum: Follower-Kurve, Conversions, Follows mit Follow-back, Entfolgen-Kandidaten, Aktivität */
+/* Wachstum: Netto-Follower pro Tag, Funnel, Follower-Kurve, Conversions, Follows mit Follow-back, Entfolgen-Kandidaten, Aktivität */
 App.register({
   id: "growth", title: "Wachstum", order: 2,
   icon: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>',
   render(el, d, app) {
     const s = d.stats;
     if (!s) {
-      el.innerHTML = app.card("Wachstum", '<p>Die Follower-Kurve und der Engagement-Verlauf kommen aus der Drive-Statistik des Engagement-Skills.</p><p class="note">⚠️ ' + app.esc(d.statsError || "Noch keine Daten") + "</p>") + followsFromInsights(d, app);
-      drawInsightFollows(el, d, app);
+      el.innerHTML = netCards(d, app) + app.card("Wachstum", '<p>Die Follower-Kurve und der Engagement-Verlauf kommen aus der Drive-Statistik des Engagement-Skills.</p><p class="note">⚠️ ' + app.esc(d.statsError || "Noch keine Daten") + "</p>");
+      drawNet(el, d, app);
       return;
     }
     const first = s.sessions[0], lastS = s.sessions[s.sessions.length - 1];
@@ -17,7 +17,8 @@ App.register({
     const open = s.follows.filter((f) => f.status !== "back");
     const unf = open.filter((f) => app.daysAgo(f.ts) >= CONFIG.unfollowAfterDays);
 
-    let html = app.card("Follower",
+    let html = netCards(d, app);
+    html += app.card("Follower",
       '<div class="stats">' +
         app.stat("Follower", app.num(lastS.followers), (gain >= 0 ? "+" : "") + app.num(gain) + " seit " + app.fmtDate(first.ts)) +
         app.stat("Folge ich", app.num(lastS.following)) +
@@ -78,12 +79,35 @@ App.register({
         '<li><div><a href="https://www.instagram.com/p/' + encodeURIComponent(a.sc || "") + '/" target="_blank" rel="noopener"><b>@' + app.esc(a.h) + '</b></a> <span class="muted small">' + app.esc(a.via || a.block || "") + " · " + app.fmtDate(a.ts, true) + "</span></div><div class=\"ctext\">" + app.esc(a.text) + "</div></li>"), 5, "list comments"));
     }
     el.innerHTML = html;
+    drawNet(el, d, app);
 
     Charts.line(el.querySelector("#ch-followers"), s.sessions.map((x) => ({ x: app.fmtDate(x.ts), y: x.followers, tip: "<b>" + app.num(x.followers) + "</b> Follower<br>" + app.fmtDate(x.ts, true) })), { id: "fol" });
     Charts.bars(el.querySelector("#ch-sessions"), s.sessions.map((x) => ({ x: app.fmtDate(x.ts), parts: [{ v: x.comments, c: "var(--accent)" }, { v: x.likes, c: "var(--blue)" }, { v: x.new, c: "var(--green)" }],
       tip: app.fmtDate(x.ts, true) + "<br>💬 " + x.comments + " · ♥ " + x.likes + " · ➕ " + x.new + (x.conv ? " · 🎯 " + x.conv : "") })));
 
-    function followsFromInsights() { return app.card("Follows laut Instagram", '<div class="chart-box" id="ch-ins-f"></div>'); }
-    function drawInsightFollows(root) { Charts.bars(root.querySelector("#ch-ins-f"), d.insights.map((x) => ({ x: app.fmtDate(x.day), parts: [{ v: x.follows || 0, c: "var(--green)" }], tip: app.fmtDate(x.day) + ": +" + (x.follows || 0) + " / −" + (x.unfollows || 0) }))); }
   }
 });
+
+/* Netto-Follower pro Tag + Funnel (aus den Konto-Insights von Instagram) */
+function netCards(d, app) {
+  const days = d.insights.filter((x) => x.follows != null || x.unfollows != null);
+  const net = days.reduce((s, x) => s + (x.follows || 0) - (x.unfollows || 0), 0);
+  let html = app.card("Netto-Follower pro Tag <span class=\"pill " + (net >= 0 ? "green" : "red") + "\">" + app.signed(net) + "</span>", '<div class="chart-box" id="ch-net"></div>',
+    { tip: "Neue Follower minus Unfollows pro Tag, direkt von Instagram. Das ist die ehrlichste Wachstumszahl: Sie zählt alles, auch Follows über Werbung, Reels und Stories, nicht nur über das Skript." });
+  const W = App.week(d), c = W && W.cur;
+  if (c && c.pvDays) {
+    const r1 = c.pvReachNonOrg ? c.pv / c.pvReachNonOrg : null, r2 = c.pv ? c.pvFollows / c.pv : null;
+    const step = (label, v, sub) => '<div class="fn-step"><div class="fn-l">' + label + '</div><div class="fn-v">' + app.num(v) + "</div>" + (sub ? '<div class="fn-s">' + sub + "</div>" : "") + "</div>";
+    const arrow = (r) => '<div class="fn-arrow">↓ <b>' + (r == null ? "–" : app.pct(r)) + "</b></div>";
+    html += app.card("Funnel <small>" + (c.pvDays === 1 ? app.fmtDate(c.pvFrom) : app.fmtDate(c.pvFrom) + "–" + app.fmtDate(c.to)) + "</small>",
+      '<div class="funnel">' + step("Erreicht, folgen dir nicht", c.pvReachNonOrg, "organisch") + arrow(r1) + step("Profilaufrufe", c.pv) + arrow(r2) + step("Neue Follower", c.pvFollows) + "</div>" +
+      (c.pvDays < 7 ? app.note("Profilaufrufe werden erst seit " + app.fmtDate(c.pvFrom) + " erfasst. Nach einer Woche ist der Funnel aussagekräftig.") : ""),
+      { tip: "Wie viele Nicht-Follower, die deinen Content gesehen haben, auf dein Profil gehen, und wie viele davon folgen. Faustregel: Ist die erste Quote niedrig, liegt es am Content (kein Grund, mehr sehen zu wollen). Ist die zweite niedrig, liegt es am Profil (Bio, Highlights, die obersten Posts)." });
+  }
+  return html;
+}
+function drawNet(el, d, app) {
+  const box = el.querySelector("#ch-net"); if (!box) return;
+  Charts.diverge(box, d.insights.filter((x) => x.follows != null || x.unfollows != null).map((x) => ({ x: app.fmtDate(x.day), v: (x.follows || 0) - (x.unfollows || 0),
+    tip: "<b>" + app.fmtDate(x.day) + "</b><br>+" + app.num(x.follows || 0) + " neu · −" + app.num(x.unfollows || 0) + " weg" })));
+}

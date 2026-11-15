@@ -108,8 +108,8 @@
         d.reachOrganic = (p.CAROUSEL_CONTAINER || 0) + (p.POST || 0) + (p.REEL || 0) + (p.STORY || 0) + (p.IGTV || 0);
         if (d.reach == null) d.reach = x.total;
       }
-      else if (x.metric === "follows_and_unfollows") { d.follows = p.FOLLOWER || 0; d.unfollows = p.NON_FOLLOWER || 0; d.net = d.follows - d.unfollows; }
-      else if (x.metric === "totals" || /_totals$/.test(r.key || "")) { Object.assign(d, { engaged: p.accounts_engaged, linkTaps: p.profile_links_taps, interactions: p.total_interactions, saves: p.saves, shares: p.shares }); }
+      else if (x.metric === "follows_and_unfollows" && x.parts) { d.follows = p.FOLLOWER || 0; d.unfollows = p.NON_FOLLOWER || 0; d.net = d.follows - d.unfollows; }
+      else if (x.metric === "totals" || /_totals$/.test(r.key || "")) { Object.assign(d, { engaged: p.accounts_engaged, linkTaps: p.profile_links_taps, interactions: p.total_interactions, saves: p.saves, shares: p.shares, profileViews: p.profile_views }); }
     });
     const insights = Object.values(days).map((d) => Object.assign(d, { adPct: d.reach && d.reachAd != null ? d.reachAd / d.reach : null })).sort((a, b) => (a.day < b.day ? -1 : 1));
 
@@ -132,7 +132,7 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, contacts, stats, cfg, session: raw.session || {}, starts: (() => { const [dd, n] = String(raw.starts || "").split("|"); return dd === localDay(new Date()) ? Number(n) || 0 : 0; })(), cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    return { posts, insights, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }
@@ -166,7 +166,7 @@
         else raw.statsError = stats.status === "rejected" ? "Drive-Statistik nicht erreichbar" : "Noch keine Drive-Statistik";
         if (cfg.status === "fulfilled" && cfg.value && typeof cfg.value === "object" && Object.keys(cfg.value).length) raw.cfg = cfg.value;
         else { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); if (old && old.cfg) raw.cfg = old.cfg; }
-        if (sess.status === "fulfilled" && sess.value) { raw.session = sess.value.session || {}; raw.starts = sess.value.starts || ""; }
+        if (sess.status === "fulfilled" && sess.value) { raw.session = sess.value.session || {}; }
         LS.set("cache", raw);
         this.data = normalize(raw);
         if (deep) this.toast("Aktuell ✓");

@@ -63,6 +63,28 @@
     interact(el, rows.length, X, (i) => rows[i].tip || rows[i].x);
   }
 
+  // Balken um eine Nulllinie: positiv nach oben (grün), negativ nach unten (rot). rows: [{x, v, tip}]
+  function diverge(el, rows, opts) {
+    opts = opts || {};
+    el.innerHTML = "";
+    if (!rows.length) { el.innerHTML = '<p class="muted">Noch keine Daten</p>'; return; }
+    const W = el.clientWidth || 320, H = opts.height || 150, P = { l: 4, r: 4, t: 14, b: 22 };
+    const hi = Math.max(1, ...rows.map((r) => r.v)), lo = Math.min(0, ...rows.map((r) => r.v)), span = hi - lo || 1;
+    const Y = (v) => P.t + ((hi - v) / span) * (H - P.t - P.b), y0 = Y(0);
+    const slot = (W - P.l - P.r) / rows.length, bw = Math.min(30, slot * 0.6);
+    const X = (i) => P.l + slot * i + slot / 2;
+    let svg = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" height="' + H + '" class="chart"><line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + y0 + '" y2="' + y0 + '" stroke="rgba(255,255,255,.18)"/>';
+    rows.forEach((r, i) => {
+      const top = Math.min(Y(r.v), y0), hgt = Math.max(r.v ? 2 : 0, Math.abs(Y(r.v) - y0));
+      svg += '<rect class="grow" x="' + (X(i) - bw / 2) + '" y="' + top + '" width="' + bw + '" height="' + hgt + '" rx="3" fill="' + (r.v >= 0 ? "var(--green)" : "var(--red)") + '" style="animation-delay:' + i * 40 + 'ms"/>';
+      if (r.v) svg += '<text x="' + X(i) + '" y="' + (r.v >= 0 ? top - 4 : y0 - 4) + '" class="axis" text-anchor="middle">' + (r.v > 0 ? "+" : "−") + Math.abs(r.v) + "</text>";
+      if (rows.length <= 10 || i % Math.ceil(rows.length / 8) === 0) svg += '<text x="' + X(i) + '" y="' + (H - 6) + '" class="axis" text-anchor="middle">' + esc(r.x) + "</text>";
+    });
+    svg += '<line class="cursor" x1="0" x2="0" y1="' + P.t + '" y2="' + (H - P.b) + '" style="display:none"/></svg><div class="tip" style="display:none"></div>';
+    el.innerHTML = svg;
+    interact(el, rows.length, X, (i) => rows[i].tip || rows[i].x);
+  }
+
   // Tippen/Ziehen zeigt Werte an
   function interact(el, n, X, tipOf) {
     const svg = el.querySelector("svg"), tip = el.querySelector(".tip"), cur = el.querySelector(".cursor");
@@ -91,5 +113,5 @@
     return '<svg class="chart spark" viewBox="0 0 200 46" preserveAspectRatio="none" width="100%" height="46" aria-hidden="true"><path d="' + l + ' L200 46 L0 46Z" fill="rgba(240,124,30,.14)"/><path class="draw" d="' + l + '" fill="none" stroke="#f07c1e" stroke-width="2"/></svg>';
   }
 
-  window.Charts = { ring, line, bars, meter, spark };
+  window.Charts = { ring, line, bars, diverge, meter, spark };
 })();

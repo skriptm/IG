@@ -14,6 +14,24 @@ App.kpi = function (d) {
     reachShare: rR != null && f ? rR / f : null, storyAvg: capAvg("Story"), tplAvg: capAvg("Template") };
 };
 
+/* 7-Tage-Fenster aus den Konto-Insights, plus Vorwoche falls komplett */
+App.week = function (d) {
+  const ins = d.insights.filter((x) => x.day); if (!ins.length) return null;
+  const add = (day, n) => { const x = new Date(day + "T12:00"); x.setDate(x.getDate() + n); return App.localDay(x); };
+  const last = ins[ins.length - 1].day;
+  const win = (from, to) => {
+    const a = ins.filter((x) => x.day >= from && x.day <= to); if (!a.length) return null;
+    const sum = (k) => a.reduce((s, x) => s + (Number(x[k]) || 0), 0), pvA = a.filter((x) => x.profileViews != null);
+    const follows = sum("follows"), unfollows = sum("unfollows");
+    return { from: a[0].day, to: a[a.length - 1].day, n: a.length, follows, unfollows, net: follows - unfollows, reach: sum("reach"), reachOrg: a.reduce((s, x) => s + (x.reachOrganic != null ? x.reachOrganic : Math.max(0, (x.reach || 0) - (x.reachAd || 0))), 0),
+      reachNonOrg: a.reduce((s, x) => s + Math.max(0, (x.reachNon || 0) - (x.reachAd || 0)), 0), inter: sum("interactions"),
+      pv: pvA.reduce((s, x) => s + (Number(x.profileViews) || 0), 0), pvDays: pvA.length, pvFrom: pvA.length ? pvA[0].day : null,
+      pvReachNonOrg: pvA.reduce((s, x) => s + Math.max(0, (x.reachNon || 0) - (x.reachAd || 0)), 0), pvFollows: pvA.reduce((s, x) => s + (Number(x.follows) || 0), 0) };
+  };
+  const cur = win(add(last, -6), last), prev = win(add(last, -13), add(last, -7));
+  return { cur, prev: prev && prev.n === 7 ? prev : null, fullFrom: add(ins[0].day, 13) };
+};
+
 App.register({
   id: "home", title: "Übersicht", order: 1,
   icon: '<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -32,9 +50,8 @@ App.register({
     // Session auf Knopfdruck + Tagesverbrauch
     const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows");
     const ss = d.session || {}, st = ss.status || "";
-    const running = (st === "gestartet" || st === "läuft") && app.daysAgo(ss.at) === 0 && (Date.now() - new Date(String(ss.at).replace(" ", "T"))) < 90 * 60e3;
-    const stLine = st === "gestartet" && running ? '<span class="pill accent">● startet … ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
-      : st === "läuft" && running ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
+    const running = st === "läuft" && app.daysAgo(ss.at) === 0 && (Date.now() - new Date(String(ss.at).replace(" ", "T"))) < 90 * 60e3;
+    const stLine = running ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
       : st === "fertig" ? '<span class="pill">✓ zuletzt fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
       : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
       : '<span class="muted small">Heute noch keine Session.</span>';
@@ -42,7 +59,7 @@ App.register({
     // Stundenbudget: Kommentare der letzten 60 Minuten (rollierend)
     const hourTs = s ? s.activity.filter((a) => a.act === "comment" && a.ts).map((a) => app.toDate(a.ts).getTime()).filter((t) => !isNaN(t) && Date.now() - t < 3600e3).sort((x, y) => x - y) : [];
     const usedH = Math.min(hourTs.length, hourCap);
-    const rounds = Math.max(todaySessions.length + (running ? 1 : 0), d.starts || 0);
+    const rounds = todaySessions.length + (running ? 1 : 0);
     const segs = Array.from({ length: hourCap }, (_, i) => '<i class="' + (i < usedH ? "on" : "") + '" style="--i:' + i + '"></i>').join("");
     let html = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
       '<div style="margin-bottom:12px">' + stLine + "</div>" +
@@ -81,6 +98,20 @@ App.register({
     if (k.signalRecent != null) adv.push(k.signalRecent < 10 ? "Auf 1.000 erreichte Konten kommen nur <b>" + app.d1(k.signalRecent) + "</b> Saves und Shares. Posts, die man speichert oder weiterschickt (Spot-Infos, Anfahrt, beste Uhrzeit, Ausrüstung), heben diesen Wert am stärksten." : "Saves und Shares liegen bei <b>" + app.d1(k.signalRecent) + "</b> pro 1.000 Reichweite. Mehr Posts in dieser Art machen.");
     if (k.reachShare != null && k.reachShare < 0.1) adv.push("Nur <b>" + app.pct(k.reachShare) + "</b> deiner Follower sehen einen Post. Reels sind der Weg zu Leuten, die dir noch nicht folgen.");
     if (adv.length) html += app.card("Fokus diese Woche", '<p class="advice1">' + adv[0] + "</p>");
+
+    const W = App.week(d);
+    if (W) {
+      const cmp = (a, b, signed) => (b == null ? "" : a == null ? "" : (() => { const df = a - b; return '<span class="' + (df >= 0 ? "up" : "down") + '">' + (df >= 0 ? "▲ " : "▼ ") + (signed ? app.num(Math.abs(df)) : (b ? Math.abs(Math.round((df / b) * 100)) + " %" : "–")) + "</span> vs. Vorwoche"; })());
+      const c = W.cur, pv = W.prev;
+      html += app.card("Diese Woche <small>" + app.fmtDate(c.from) + "–" + app.fmtDate(c.to) + "</small>",
+        '<div class="stats">' +
+          app.stat("Netto-Follower", '<span class="' + (c.net >= 0 ? "up" : "down") + '">' + app.signed(c.net) + "</span>", pv ? cmp(c.net, pv.net, true) : "+" + app.num(c.follows) + " / −" + app.num(c.unfollows)) +
+          app.stat("Reichweite organisch", app.num(c.reachOrg), pv ? cmp(c.reachOrg, pv.reachOrg) : "Ø " + app.num(Math.round(c.reachOrg / c.n)) + " pro Tag") +
+          app.stat("Interaktionen", app.num(c.inter), pv ? cmp(c.inter, pv.inter) : "") +
+          app.stat("Profilaufrufe", c.pvDays ? app.num(c.pv) : "–", c.pvDays ? (pv && pv.pvDays === 7 ? cmp(c.pv, pv.pv) : c.pvDays < c.n ? "seit " + app.fmtDate(c.pvFrom) : "") : "ab morgen") +
+        "</div>" + (pv ? "" : app.note("Vergleich mit der Vorwoche ab " + app.fmtDate(W.fullFrom) + ", vorher fehlen die Daten.")),
+        { tip: "Summe der letzten 7 Tage mit Daten. Netto = neue Follower minus Unfollows. Organisch = ohne Reichweite aus Werbung. Reichweite ist die Summe der Tageswerte, dieselbe Person kann an mehreren Tagen zählen." });
+    }
 
     const p = d.posts[0];
     if (p) html += app.card("Neuester Post",

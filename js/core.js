@@ -240,7 +240,7 @@
     card(title, inner, opts) {
       opts = opts || {};
       const tip = opts.tip ? '<button class="tip-btn" aria-label="Erklärung">ⓘ</button>' : "";
-      return '<section class="card glass" data-anim' + (opts.id ? ' id="' + opts.id + '"' : "") + ">" + (title || tip ? '<h2 class="card-title">' + (title || "") + tip + "</h2>" : "") + (opts.tip ? '<p class="tip">' + opts.tip + "</p>" : "") + inner + "</section>";
+      return '<section class="card glass" data-anim' + (opts.id ? ' id="' + opts.id + '"' : "") + ">" + (title || tip ? '<h2 class="card-title">' + (title || "") + tip + "</h2>" : "") + (opts.tip ? '<p class="card-tip">' + opts.tip + "</p>" : "") + inner + "</section>";
     },
     stat(label, value, sub, cls) { return '<div class="stat ' + (cls || "") + '"><div class="stat-l">' + label + '</div><div class="stat-v">' + value + "</div>" + (sub ? '<div class="stat-s">' + sub + "</div>" : "") + "</div>"; },
     note(text) { return '<p class="info">ⓘ ' + text + "</p>"; },

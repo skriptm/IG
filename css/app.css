@@ -58,8 +58,8 @@ h1 { margin: 6px 0 0; font-family: var(--serif); font-weight: 400; font-size: 40
 .card-title:has(.tip-btn) { padding-right: 26px; }
 .tip-btn { position: absolute; top: 15px; right: 10px; background: none; border: 0; color: var(--muted); font-size: 17px; line-height: 1; padding: 4px 2px 4px 10px; cursor: pointer; opacity: .7; }
 .card.tip-open .tip-btn { color: var(--accent-l); opacity: 1; }
-.tip { display: none; color: var(--muted); font-size: 12.5px; line-height: 1.45; margin: -4px 0 12px; padding: 9px 11px; border-radius: 10px; background: rgba(0,0,0,.25); border-left: 2px solid var(--accent); }
-.card.tip-open .tip { display: block; }
+.card-tip { display: none; color: var(--muted); font-size: 12.5px; line-height: 1.45; margin: -4px 0 12px; padding: 9px 11px; border-radius: 10px; background: rgba(0,0,0,.25); border-left: 2px solid var(--accent); }
+.card.tip-open .card-tip { display: block; }
 details.more { margin-top: 6px; }
 details.more summary { cursor: pointer; color: var(--accent-l); font-size: 13px; padding: 8px 0; list-style: none; }
 details.more summary::-webkit-details-marker { display: none; }

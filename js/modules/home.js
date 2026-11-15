@@ -104,19 +104,6 @@ App.register({
     };
     tickHour(); App._hourTimer = setInterval(tickHour, 30e3);
 
-    const sb = el.querySelector("#sess-start");
-    if (sb) sb.onclick = async () => {
-      if (!confirm("Jetzt eine Engagement-Session auf dem Laptop starten?")) return;
-      sb.disabled = true; sb.textContent = "Starte …";
-      try {
-        const r = await app.call({ a: "start" }, 40000);
-        if (r.ok) { d.session = { status: "gestartet", at: app.stamp() }; d.starts = (d.starts || 0) + 1; app.toast("Session gestartet ✓ – Ergebnis kommt per Push"); }
-        else { d.session = { status: "fehler", at: app.stamp(), summary: r.code === 401 ? "Start-Token fehlt oder ist ungültig (Make)" : "Claude hat den Start abgelehnt (Code " + r.code + ")" }; app.toast("Start fehlgeschlagen", "bad"); }
-        const raw = app.LS.get("cache", null); if (raw) { raw.session = d.session; raw.starts = app.localDay(new Date()) + "|" + d.starts; app.LS.set("cache", raw); }
-      } catch (err) { app.toast("Start fehlgeschlagen: " + err.message, "bad"); }
-      app.render();
-    };
-
     el.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); app.go(a.dataset.go, a.dataset.anchor); }));
   }
 });

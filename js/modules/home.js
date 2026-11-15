@@ -40,7 +40,7 @@ App.register({
       : st === "läuft" && running ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
       : st === "fertig" ? '<span class="pill">✓ zuletzt fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
       : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
-      : '<span class="muted small">Noch keine Session über die App gestartet.</span>';
+      : '<span class="muted small">Heute noch keine Session.</span>';
     const L = cfg.limits || {}, dayCap = L.day || 40, hourCap = L.hour || 10, followCap = L.follow_day || 5;
     // Stundenbudget: Kommentare der letzten 60 Minuten (rollierend)
     const hourTs = s ? s.activity.filter((a) => a.act === "comment" && a.ts).map((a) => app.toDate(a.ts).getTime()).filter((t) => !isNaN(t) && Date.now() - t < 3600e3).sort((x, y) => x - y) : [];
@@ -49,13 +49,12 @@ App.register({
     const segs = Array.from({ length: hourCap }, (_, i) => '<i class="' + (i < usedH ? "on" : "") + '" style="--i:' + i + '"></i>').join("");
     let html = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
       '<div style="margin-bottom:12px">' + stLine + "</div>" +
-      '<button class="btn primary shine' + (running ? " busy" : "") + '" id="sess-start"' + (running || cfg.paused ? " disabled" : "") + ">" + (running ? "Session läuft …" : "▶︎ Session starten") + "</button>" +
       '<div class="hourbox' + (usedH >= hourCap ? " full" : "") + '">' +
         '<div class="hb-top"><span class="stat-l">Diese Stunde</span><span class="hb-v"><b class="cu" data-to="' + usedH + '">0</b><small> / ' + hourCap + " Kommentare</small></span></div>" +
         '<div class="segs">' + segs + "</div>" +
         '<div class="hb-sub" id="hb-sub"></div>' +
       "</div>" +
-      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Jeder Start ist eine volle Runde auf dem Windows-Laptop. Sicherheitsnetz: " + dayCap + " Kommentare am Tag, " + hourCap + " pro Stunde, danach nur noch Likes."), { id: "session" });
+      app.note(cfg.paused ? "Engagement ist pausiert (Einstellungen → Basis)." : "Start im Claude-Chat mit „Session starten“. Sicherheitsnetz: " + dayCap + " Kommentare am Tag, " + hourCap + " pro Stunde, danach nur noch Likes."), { id: "session" });
 
     const newF = sum("new");
     html += app.card("Heute",

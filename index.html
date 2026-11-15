@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/app.css?v=5">
+<link rel="stylesheet" href="css/app.css?v=7">
 </head>
 <body>
 <div id="ptr" class="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -38,9 +38,14 @@
           <div class="eyebrow">@andrelauinger</div>
           <h1>IG Growth</h1>
         </div>
-        <button class="icon-btn" id="refresh-btn" aria-label="Instagram neu abfragen">
-          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+        <div class="hero-btns">
+          <a class="icon-btn" href="https://www.instagram.com/andrelauinger/" target="_blank" rel="noopener" aria-label="Instagram öffnen">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <button class="icon-btn" id="refresh-btn" aria-label="Instagram neu abfragen">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
       </div>
       <div class="hero-sub" id="hero-sub">Lädt …</div>
       <div class="pause-badge" id="hero-pause" hidden>⏸ Engagement pausiert</div>
@@ -53,14 +58,14 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="js/config.js?v=5"></script>
-<script src="js/core.js?v=5"></script>
-<script src="js/charts.js?v=5"></script>
-<script src="js/modules/home.js?v=6"></script>
-<script src="js/modules/growth.js?v=5"></script>
-<script src="js/modules/content.js?v=5"></script>
-<script src="js/modules/contacts.js?v=5"></script>
-<script src="js/modules/settings.js?v=5"></script>
+<script src="js/config.js?v=7"></script>
+<script src="js/core.js?v=7"></script>
+<script src="js/charts.js?v=7"></script>
+<script src="js/modules/home.js?v=7"></script>
+<script src="js/modules/growth.js?v=7"></script>
+<script src="js/modules/content.js?v=7"></script>
+<script src="js/modules/contacts.js?v=7"></script>
+<script src="js/modules/settings.js?v=7"></script>
 <script>App.start();</script>
 </body>
 </html>

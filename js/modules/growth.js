@@ -51,31 +51,31 @@ App.register({
     if (roiRows.length) html += app.card("Bringt das Skript Follower?",
       '<p class="lead">Seit Messbeginn <b>' + app.num(totalComments) + "</b> Kommentare, <b>" + app.num(s.sessions.reduce((a, x) => a + (x.new || 0), 0)) + "</b> neue Follower, davon <b>" + conv + "</b> direkt zurückführbar.</p>" +
       '<div class="table-wrap"><table class="t"><thead><tr><th>Bereich</th><th>Kommentare</th><th>Follower</th><th>pro Follower</th></tr></thead><tbody>' +
-      roiRows.map((r) => "<tr><td>" + app.esc(r.area) + "</td><td>" + r.comments + "</td><td>" + r.conv + "</td><td>" + (r.conv ? app.d1(r.comments / r.conv) : "–") + "</td></tr>").join("") + "</tbody></table></div>" +
-      app.note("„pro Follower“ = wie viele Kommentare ein Bereich im Schnitt für einen neuen Follower braucht. Weniger ist besser."));
+      roiRows.map((r) => "<tr><td>" + app.esc(r.area) + "</td><td>" + r.comments + "</td><td>" + r.conv + "</td><td>" + (r.conv ? app.d1(r.comments / r.conv) : "–") + "</td></tr>").join("") + "</tbody></table></div>",
+      { tip: "„pro Follower“ = wie viele Kommentare ein Bereich im Schnitt für einen neuen Follower braucht. Weniger ist besser." });
 
     if (s.conversions.length) {
-      html += app.card("Conversions <span class=\"pill\">" + conv + "</span>", '<ul class="list">' + s.conversions.map((c) =>
-        '<li><a href="' + app.profile(c.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(c.h) + '</b></a><span class="muted">über ' + app.esc(c.via || c.block || "–") + "</span><span class=\"right muted\">" + app.fmtDate(c.ts) + "</span></li>").join("") + "</ul>");
+      html += app.card("Conversions <span class=\"pill\">" + conv + "</span>", app.more(s.conversions.map((c) =>
+        '<li><a href="' + app.profile(c.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(c.h) + '</b></a><span class="muted">über ' + app.esc(c.via || c.block || "–") + "</span><span class=\"right muted\">" + app.fmtDate(c.ts) + "</span></li>")));
     }
 
-    html += app.card("Gefolgt <span class=\"pill\">" + s.follows.length + "</span>", s.follows.length ? '<ul class="list">' + s.follows.map((f) =>
+    html += app.card("Gefolgt <span class=\"pill\">" + s.follows.length + "</span>", s.follows.length ? app.more(s.follows.map((f) =>
       '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + "</b></a>" +
       '<span class="muted">' + (f.f ? app.num(f.f) + " Follower · " : "") + app.esc(f.via || "") + "</span>" +
-      '<span class="right">' + (f.status === "back" ? '<span class="pill green">folgt zurück</span>' : '<span class="pill">' + app.daysAgo(f.ts) + " T. offen</span>") + "</span></li>").join("") + "</ul>" : '<p class="muted">Noch niemandem gefolgt.</p>');
+      '<span class="right">' + (f.status === "back" ? '<span class="pill green">folgt zurück</span>' : '<span class="pill">' + app.daysAgo(f.ts) + " T. offen</span>") + "</span></li>")) : '<p class="muted">Noch niemandem gefolgt.</p>');
 
     html += app.card("Entfolgen? <span class=\"pill" + (unf.length ? " accent" : "") + "\">" + unf.length + "</span>",
-      unf.length ? '<p class="muted small">Seit mindestens ' + CONFIG.unfollowAfterDays + ' Tagen kein Follow-back.</p><ul class="list">' + unf.map((f) => '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + '</b></a><span class="right muted">seit ' + app.fmtDate(f.ts) + "</span></li>").join("") + "</ul>"
-        : '<p class="muted">Niemand – alle offenen Follows sind jünger als ' + CONFIG.unfollowAfterDays + " Tage.</p>");
+      unf.length ? app.more(unf.map((f) => '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + '</b></a><span class="right muted">seit ' + app.fmtDate(f.ts) + "</span></li>"))
+        : '<p class="muted">Niemand – alle offenen Follows sind jünger als ' + CONFIG.unfollowAfterDays + " Tage.</p>", { tip: "Profile, denen du seit mindestens " + CONFIG.unfollowAfterDays + " Tagen folgst, ohne Follow-back." });
 
     if (s.newFollowers.length) {
-      html += app.card("Neue Follower <span class=\"pill\">" + s.newFollowers.length + "</span>", '<div class="chips">' + s.newFollowers.slice(0, 40).map((f) => '<a class="chip" href="' + app.profile(f.h) + '" target="_blank" rel="noopener">@' + app.esc(f.h) + "</a>").join("") + "</div>");
+      html += app.card("Neue Follower <span class=\"pill\">" + s.newFollowers.length + "</span>", app.more(s.newFollowers.slice(0, 40).map((f) => '<a class="chip" href="' + app.profile(f.h) + '" target="_blank" rel="noopener">@' + app.esc(f.h) + "</a>"), 12, "chips"));
     }
 
     const acts = s.activity.filter((a) => a.act === "comment" && a.text).slice(0, 25);
     if (acts.length) {
-      html += app.card("Letzte Kommentare von dir", '<ul class="list comments">' + acts.map((a) =>
-        '<li><div><a href="https://www.instagram.com/p/' + encodeURIComponent(a.sc || "") + '/" target="_blank" rel="noopener"><b>@' + app.esc(a.h) + '</b></a> <span class="muted small">' + app.esc(a.via || a.block || "") + " · " + app.fmtDate(a.ts, true) + "</span></div><div class=\"ctext\">" + app.esc(a.text) + "</div></li>").join("") + "</ul>");
+      html += app.card("Letzte Kommentare von dir", app.more(acts.map((a) =>
+        '<li><div><a href="https://www.instagram.com/p/' + encodeURIComponent(a.sc || "") + '/" target="_blank" rel="noopener"><b>@' + app.esc(a.h) + '</b></a> <span class="muted small">' + app.esc(a.via || a.block || "") + " · " + app.fmtDate(a.ts, true) + "</span></div><div class=\"ctext\">" + app.esc(a.text) + "</div></li>"), 5, "list comments"));
     }
     el.innerHTML = html;
 

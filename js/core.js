@@ -239,10 +239,16 @@
     /* Bausteine für Module */
     card(title, inner, opts) {
       opts = opts || {};
-      return '<section class="card glass" data-anim' + (opts.id ? ' id="' + opts.id + '"' : "") + ">" + (title ? '<h2 class="card-title">' + title + "</h2>" : "") + inner + "</section>";
+      const tip = opts.tip ? '<button class="tip-btn" aria-label="Erklärung">ⓘ</button>' : "";
+      return '<section class="card glass" data-anim' + (opts.id ? ' id="' + opts.id + '"' : "") + ">" + (title || tip ? '<h2 class="card-title">' + (title || "") + tip + "</h2>" : "") + (opts.tip ? '<p class="tip">' + opts.tip + "</p>" : "") + inner + "</section>";
     },
     stat(label, value, sub, cls) { return '<div class="stat ' + (cls || "") + '"><div class="stat-l">' + label + '</div><div class="stat-v">' + value + "</div>" + (sub ? '<div class="stat-s">' + sub + "</div>" : "") + "</div>"; },
     note(text) { return '<p class="info">ⓘ ' + text + "</p>"; },
+    /* Liste mit den ersten n Einträgen, Rest hinter „Alle anzeigen“ */
+    more(items, n, cls) {
+      cls = cls || "list"; n = n || 5; const t = /chips/.test(cls) ? "div" : "ul", box = (x) => "<" + t + ' class="' + cls + '">' + x.join("") + "</" + t + ">";
+      return box(items.slice(0, n)) + (items.length > n ? '<details class="more"><summary>Alle anzeigen (' + items.length + ")</summary>" + box(items.slice(n)) + "</details>" : "");
+    },
     profile(hh) { return "https://www.instagram.com/" + encodeURIComponent(hh) + "/"; },
     userLink(hh) { return '<a href="' + App.profile(hh) + '" target="_blank" rel="noopener"><b>@' + esc(hh) + "</b></a>"; },
 
@@ -279,3 +285,6 @@
   };
   window.App = App;
 })();
+
+/* ⓘ-Erklärungen auf- und zuklappen */
+document.addEventListener("click", (e) => { const b = e.target.closest(".tip-btn"); if (b) { e.preventDefault(); b.closest(".card").classList.toggle("tip-open"); } });

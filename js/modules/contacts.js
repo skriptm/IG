@@ -7,13 +7,10 @@ App.register({
     const me = this;
     el.innerHTML =
       app.card("Gegenbesuch <span class=\"pill\" id=\"n-open\"></span>",
-        '<p class="lead">Leute, die bei dir kommentiert haben, bekommen einen Gegenbesuch: Like und Kommentar auf ihren neuesten Post.</p>' +
         '<div class="btnrow"><button class="btn primary" id="mark-sel" disabled>✅ Auswahl merken · <span id="n-sel">0</span></button><button class="btn" id="mark-all">📌 Alle merken</button></div>' +
-        '<ul class="list contacts" id="open-list"></ul>' +
-        app.note("„✓ beantwortet“ heißt: Du hast unter deinem Post geantwortet. Der Gegenbesuch auf seinem Profil steht trotzdem noch aus."), { id: "gb" }) +
+        '<ul class="list contacts" id="open-list"></ul>', { id: "gb", tip: "Leute, die bei dir kommentiert haben, bekommen einen Gegenbesuch: Like und Kommentar auf ihren neuesten Post. „✓ beantwortet“ heißt nur, dass du unter deinem Post geantwortet hast, der Gegenbesuch steht noch aus." }) +
       app.card("In Warteschlange <span class=\"pill accent\" id=\"n-q\"></span>",
-        '<ul class="list contacts" id="q-list"></ul>' +
-        app.note("Die nächste Engagement-Session besucht sie zuerst. Kommentare zählen zum Tageslimit, danach wird nur noch geliked. Mit ✕ nimmst du jemanden ganz von der Liste."));
+        '<ul class="list contacts" id="q-list"></ul>', { tip: "Die nächste Engagement-Session besucht sie zuerst. Kommentare zählen zum Tageslimit, danach wird nur noch geliked. Mit ✕ nimmst du jemanden ganz von der Liste." });
 
     const openL = el.querySelector("#open-list"), qL = el.querySelector("#q-list"), selBtn = el.querySelector("#mark-sel");
     const row = (c, queued) =>

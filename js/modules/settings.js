@@ -49,39 +49,37 @@ App.register({
     const numf = (path, label, v) => '<label class="field"><span>' + label + '</span><input type="number" inputmode="numeric" min="0" data-num="' + path + '" value="' + v + '"></label>';
 
     if (me.tab === "basis") {
-      html += app.card("Pause", '<div class="switchrow"><span>' + (c.paused ? '<span class="pill red">Pausiert, keine Sessions</span>' : '<span class="pill green">Aktiv, Sessions laufen</span>') + "</span>" + sw("paused", c.paused, true) + "</div>" + app.note("Ist die Pause an, startet der Skill keine Session, z. B. im Urlaub."));
-      html += app.card("No-Go-Accounts", chips("nogo", "@", "nogo") + adder("nogo", "@handle oder Profil-Link") + app.note("Werden nie geliked, kommentiert oder gefolgt."));
-      html += app.card("Tabu-Wörter", chips("taboo", "") + adder("taboo", "z. B. mega Bild") + app.note("Wörter, Floskeln oder Emojis, die nie in einem Kommentar landen dürfen."));
+      html += app.card("Pause", '<div class="switchrow"><span>' + (c.paused ? '<span class="pill red">Pausiert, keine Sessions</span>' : '<span class="pill green">Aktiv, Sessions laufen</span>') + "</span>" + sw("paused", c.paused, true) + "</div>", { tip: "Ist die Pause an, startet der Skill keine Session, z. B. im Urlaub." });
+      html += app.card("No-Go-Accounts", chips("nogo", "@", "nogo") + adder("nogo", "@handle oder Profil-Link"), { tip: "Werden nie geliked, kommentiert oder gefolgt." });
+      html += app.card("Tabu-Wörter", chips("taboo", "") + adder("taboo", "z. B. mega Bild"), { tip: "Wörter, Floskeln oder Emojis, die nie in einem Kommentar landen dürfen." });
     }
     if (me.tab === "accounts") {
-      html += app.card("Kernliste <span class=\"pill\">" + c.friends.length + "</span>", chips("friends", "@") + adder("friends", "@handle") + app.note("Deine 15–20 wichtigsten Leute. Jede Session wird ihr neuester Post geliked und kommentiert."));
-      html += app.card("Priority-Hubs <span class=\"pill\">" + c.hubs.length + "</span>", chips("hubs", "@") + adder("hubs", "@handle") + app.note("Täglich besucht, aus ihren Kommentarspalten kommen die Hub-Kommentatoren."));
+      html += app.card("Kernliste <span class=\"pill\">" + c.friends.length + "</span>", chips("friends", "@") + adder("friends", "@handle"), { tip: "Deine 15–20 wichtigsten Leute. Jede Session wird ihr neuester Post geliked und kommentiert." });
+      html += app.card("Priority-Hubs <span class=\"pill\">" + c.hubs.length + "</span>", chips("hubs", "@") + adder("hubs", "@handle"), { tip: "Täglich besucht, aus ihren Kommentarspalten kommen die Hub-Kommentatoren." });
     }
     if (me.tab === "hashtags") {
-      html += app.card("Hashtags <span class=\"pill\">" + c.hashtags.length + "</span>", chips("hashtags", "#") + adder("hashtags", "#hashtag") + app.note("Die Reihenfolge ist die Rotation. So viele, wie das Hashtag-Budget zulässt."));
+      html += app.card("Hashtags <span class=\"pill\">" + c.hashtags.length + "</span>", chips("hashtags", "#") + adder("hashtags", "#hashtag"), { tip: "Die Reihenfolge ist die Rotation. So viele, wie das Hashtag-Budget zulässt." });
     }
     if (me.tab === "limits") {
-      html += app.card("Limits", '<div class="grid2">' + me.LIMITS.map(([k, l]) => numf("limits." + k, l, c.limits[k])).join("") + "</div>" + app.note("Sicherheitsgrenzen gegen Action-Sperren. Lieber vorsichtig erhöhen."));
+      html += app.card("Limits", '<div class="grid2">' + me.LIMITS.map(([k, l]) => numf("limits." + k, l, c.limits[k])).join("") + "</div>", { tip: "Sicherheitsgrenzen gegen Action-Sperren. Lieber vorsichtig erhöhen." });
       const sum = Object.values(c.budget).reduce((a, b) => a + Number(b || 0), 0);
       html += app.card("Kommentar-Budget", '<div class="grid2">' + me.BUDGET.map(([k, l]) => numf("budget." + k, l, c.budget[k])).join("") + numf("feed_repeat_days", "Startseite: Sperrfrist Tage", c.feed_repeat_days) + "</div>" +
         app.note("Summe: " + sum + " von " + c.limits.day + " pro Tag" + (sum > c.limits.day ? ", mehr als das Tageslimit, der Rest verfällt." : ".")));
       html += app.card("Ruhezeiten", '<div class="switchrow"><span>' + (c.quiet.on ? "Ruhe von " + app.esc(c.quiet.from) + " bis " + app.esc(c.quiet.to) : "Keine Ruhezeiten") + "</span>" + sw("quiet.on", c.quiet.on) + "</div>" +
-        '<div class="grid2" style="margin-top:12px"><label class="field"><span>Ruhe ab</span><input type="time" data-time="quiet.from" value="' + app.esc(c.quiet.from) + '"></label><label class="field"><span>Ruhe bis</span><input type="time" data-time="quiet.to" value="' + app.esc(c.quiet.to) + '"></label></div>' + app.note("In diesem Fenster startet keine Session (Schweizer Zeit)."));
+        '<div class="grid2" style="margin-top:12px"><label class="field"><span>Ruhe ab</span><input type="time" data-time="quiet.from" value="' + app.esc(c.quiet.from) + '"></label><label class="field"><span>Ruhe bis</span><input type="time" data-time="quiet.to" value="' + app.esc(c.quiet.to) + '"></label></div>', { tip: "In diesem Fenster startet keine Session (Schweizer Zeit)." });
     }
     if (me.tab === "ziel") {
-      html += app.card("Follower-Ziel", '<div class="grid2">' + numf("goal.followers", "Ziel (Follower)", c.goal.followers || "") + '<label class="field"><span>Bis wann</span><input type="date" data-date="goal.date" value="' + app.esc(c.goal.date || "") + '"></label></div>' + app.note("Der Wachstum-Tab rechnet aus deinem Tempo hoch, wann du es erreichst."));
-      html += app.card("Beispielkommentare", chips("examples", "") + adder("examples", "z. B. wo stand der Van da? 😮‍💨") + app.note("So klingst du. Der Skill nimmt sie als Vorbild für Ton und Länge, kopiert sie aber nicht."));
-      html += app.card("Top-Fans automatisch merken", '<div class="switchrow"><span>' + (c.fans_to_watchlist ? "An" : "Aus") + "</span>" + sw("fans_to_watchlist", c.fans_to_watchlist) + "</div>" + app.note("Wer oft bei dir kommentiert, aber 14 Tage nichts von dir bekommen hat, landet auf der Merkliste."));
+      html += app.card("Follower-Ziel", '<div class="grid2">' + numf("goal.followers", "Ziel (Follower)", c.goal.followers || "") + '<label class="field"><span>Bis wann</span><input type="date" data-date="goal.date" value="' + app.esc(c.goal.date || "") + '"></label></div>', { tip: "Der Wachstum-Tab rechnet aus deinem Tempo hoch, wann du es erreichst." });
+      html += app.card("Beispielkommentare", chips("examples", "") + adder("examples", "z. B. wo stand der Van da? 😮‍💨"), { tip: "So klingst du. Der Skill nimmt sie als Vorbild für Ton und Länge, kopiert sie aber nicht." });
+      html += app.card("Top-Fans automatisch merken", '<div class="switchrow"><span>' + (c.fans_to_watchlist ? "An" : "Aus") + "</span>" + sw("fans_to_watchlist", c.fans_to_watchlist) + "</div>", { tip: "Wer oft bei dir kommentiert, aber 14 Tage nichts von dir bekommen hat, landet auf der Merkliste." });
     }
     if (me.tab === "merkliste") {
-      html += app.card("Merkliste <span class=\"pill\">" + c.watchlist.length + "</span>", chips("watchlist", "@") + adder("watchlist", "@handle oder Profil-Link") + app.note("Die nächste Session besucht sie zuerst (liken + kommentieren) und nimmt sie danach von der Liste."));
+      html += app.card("Merkliste <span class=\"pill\">" + c.watchlist.length + "</span>", chips("watchlist", "@") + adder("watchlist", "@handle oder Profil-Link"), { tip: "Die nächste Session besucht sie zuerst (liken + kommentieren) und nimmt sie danach von der Liste." });
     }
     if (me.tab === "app") {
       const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
       if (!standalone) html += app.card("📲 Als App installieren", '<ol class="steps"><li>In <b>Safari</b> öffnen</li><li><b>Teilen</b> <span class="kbd">⬆︎</span> antippen</li><li><b>„Zum Home-Bildschirm“</b></li></ol>');
-      html += app.card("Zugang", '<label class="field"><span>Zugangscode</span><input id="code" type="password" autocomplete="off" placeholder="Code eingeben" value="' + app.esc(app.settings.code) + '"></label><button class="btn primary" id="save-code" style="margin-top:10px">Speichern & laden</button>' + app.note("Bleibt nur auf diesem Gerät."));
-      const g = app.settings.goals;
-      html += app.card("Tagesziele in der App", '<div class="grid2"><label class="field"><span>Likes</span><input id="g-likes" type="number" inputmode="numeric" min="1" value="' + g.likes + '"></label><label class="field"><span>Neue Follower</span><input id="g-new" type="number" inputmode="numeric" min="1" value="' + g.newFollowers + '"></label></div><button class="btn" id="save-goals" style="margin-top:10px">Speichern</button>' + app.note("Das Kommentar-Ziel kommt aus „Limits & Zeiten“."));
+      html += app.card("Zugang", '<label class="field"><span>Zugangscode</span><input id="code" type="password" autocomplete="off" placeholder="Code eingeben" value="' + app.esc(app.settings.code) + '"></label><button class="btn primary" id="save-code" style="margin-top:10px">Speichern & laden</button>', { tip: "Bleibt nur auf diesem Gerät." });
       html += app.card("App", '<ul class="list"><li><span>Version</span><span class="right muted">' + CONFIG.version + "</span></li><li><span>Daten geladen</span><span class=\"right muted\">" + (d ? app.esc(app.rel(d.fetched)) : "–") + "</span></li><li><span>Instagram abgefragt</span><span class=\"right muted\">" + (d && d.igFetched ? app.esc(app.rel(d.igFetched)) : "–") + "</span></li><li><span>Einstellungen geändert</span><span class=\"right muted\">" + (c && c.updated ? app.esc(app.rel(c.updated)) : "–") + "</span></li></ul>" +
         '<div class="actions" style="margin-top:10px"><button class="btn" id="reload-app">App neu laden</button><button class="btn danger" id="reset">Zwischenspeicher leeren</button></div>');
     }
@@ -117,7 +115,6 @@ App.register({
 
     if (me.tab === "app") {
       pane.querySelector("#save-code").onclick = () => { app.settings.code = pane.querySelector("#code").value.trim(); app.toast("Gespeichert"); app.data = null; app.LS.del("cache"); app.go("home"); app.load(true); };
-      pane.querySelector("#save-goals").onclick = () => { const v = (id) => Math.max(1, parseInt(pane.querySelector("#" + id).value, 10) || 1); app.settings.goals = { likes: v("g-likes"), newFollowers: v("g-new") }; app.toast("Gespeichert"); };
       pane.querySelector("#reload-app").onclick = async () => { if ("caches" in window) { const ks = await caches.keys(); await Promise.all(ks.map((k) => caches.delete(k))); } if (navigator.serviceWorker) { const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map((r) => r.unregister())); } location.reload(); };
       pane.querySelector("#reset").onclick = () => { if (confirm("Zwischengespeicherte Daten löschen? Der Zugangscode bleibt.")) { app.LS.del("cache"); app.data = null; app.load(true); } };
     }

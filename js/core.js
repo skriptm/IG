@@ -75,8 +75,9 @@
 
     const rawPosts = (raw.posts || []).map((r) => r.data || r).filter((p) => p && p.id);
     const lastRun = Math.max(0, ...rawPosts.map((p) => Date.parse(p.updated) || 0));
-    const posts = rawPosts.filter((p) => p.product !== "STORY").map((p) => {
-      const m = kv(p.metrics);
+    const reelWt = {}; rawPosts.filter((p) => p.product === "REELWT").forEach((p) => { reelWt[p.id] = kv(p.metrics); });
+    const posts = rawPosts.filter((p) => p.product !== "STORY" && p.product !== "REELWT").map((p) => {
+      const m = kv(p.metrics), wt = reelWt[p.id];
       const commentList = String(p.comments || "").split(";").filter(Boolean).map((c) => { const [hh, ts, text, id, rep] = c.split("|"); return { h: hh, ts, text: dec(text), id, replies: Number(rep) || 0 }; });
       const reach = m.reach || 0, inter = m.total_interactions || (Number(p.likes) || 0) + (Number(p.comments_count) || 0);
       const caption = dec(p.caption);
@@ -86,7 +87,8 @@
         captionType: /^TRAVEL\s*\|\s*ADVENTURE/i.test(caption.trim()) ? "Template" : "Story",
         likes: Number(p.likes) || 0, comments: Number(p.comments_count) || 0, reach, views: m.views || 0, saves: m.saved || 0, shares: m.shares || 0,
         interactions: inter, er: reach ? inter / reach : null, signal: reach ? Math.round(((m.saved || 0) + (m.shares || 0)) / reach * 10000) / 10 : null,
-        young: Date.now() - Date.parse(p.ts) < 48 * 3600e3, fresh: lastRun - (Date.parse(p.updated) || 0) < 2 * 3600e3, updated: p.updated, commentList
+        young: Date.now() - Date.parse(p.ts) < 48 * 3600e3, fresh: lastRun - (Date.parse(p.updated) || 0) < 2 * 3600e3, updated: p.updated, commentList,
+        watchAvg: wt && wt.ig_reels_avg_watch_time ? wt.ig_reels_avg_watch_time / 1000 : null, watchTotal: wt && wt.ig_reels_video_view_total_time ? wt.ig_reels_video_view_total_time / 1000 : null
       };
     }).sort((a, b) => (a.ts < b.ts ? 1 : -1));
 
@@ -97,9 +99,13 @@
     const openComments = allComments.filter((c) => c.fresh && !c.replies);
     const repliedBy = new Set(allComments.filter((c) => c.replies > 0).map((c) => c.h));
 
-    const days = {};
+    const days = {}, demo = {};
     (raw.insights || []).forEach((r) => {
       const x = r.data || r; if (!x || !x.day) return;
+      if (x.metric === "follower_demographics") {
+        demo[x.breakdown] = String(x.parts || "").split("|").map((e) => { const i = e.lastIndexOf("="); return { k: e.slice(0, i), v: Number(e.slice(i + 1)) || 0 }; }).filter((e) => e.k);
+        demo.day = x.day; return;
+      }
       const d = days[x.day] || (days[x.day] = { day: x.day });
       const p = kv(x.parts);
       if (x.metric === "reach" && x.breakdown === "follow_type") { d.reach = x.total; d.reachFollower = p.FOLLOWER || 0; d.reachNon = p.NON_FOLLOWER || 0; }
@@ -132,7 +138,7 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    return { posts, insights, demo, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }

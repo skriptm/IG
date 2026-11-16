@@ -1,4 +1,4 @@
-/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite, Ranking, Formate, Captions, Monate, Konto-Insights */
+/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite, Ranking, Formate, Captions, Reels, Monate, Konto-Insights, Zielgruppe */
 App.register({
   id: "content", title: "Content", order: 3,
   icon: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.6"/></svg>',
@@ -37,6 +37,13 @@ App.register({
     html += app.card("Was funktioniert", tbl(group("format"), "Format") + '<div style="margin-top:12px"></div>' + tbl(group("captionType"), "Caption"),
       { tip: "„pro 1.000“ = Saves + Shares je 1.000 erreichte Konten. Template = Caption beginnt mit „TRAVEL | ADVENTURE“, alles andere zählt als Story. Wenige Posts, eher Tendenz als Beweis." });
 
+    // Reels: Wiedergabedauer
+    const reels = posts.filter((p) => p.watchAvg != null);
+    if (reels.length) html += app.card("Reels <span class=\"pill\">" + reels.length + "</span>",
+      '<div class="table-wrap"><table class="t"><thead><tr><th>Reel</th><th>Ø Wiedergabe</th><th>Aufrufe</th><th>Reichweite</th></tr></thead><tbody>' +
+      reels.map((p) => '<tr><td><a href="' + app.esc(p.link) + '" target="_blank" rel="noopener">' + app.fmtDate(p.ts) + "</a></td><td><b>" + app.d1(p.watchAvg) + " s</b></td><td>" + app.num(p.views) + "</td><td>" + app.num(p.reach) + "</td></tr>").join("") + "</tbody></table></div>",
+      { tip: "Ø Wiedergabe = wie lange ein Reel im Schnitt läuft. Je länger, desto eher zeigt Instagram es Leuten, die dir noch nicht folgen. Wird täglich um 06:10 aktualisiert, nur für die 8 neuesten Posts." });
+
     html += app.card("Reichweite pro Monat", '<div class="chart-box" id="ch-months"></div>', { tip: "Ø Reichweite pro Post je Monat." });
 
     // Konto-Insights
@@ -49,6 +56,21 @@ App.register({
         '<div class="table-wrap" style="margin-top:12px"><table class="t"><thead><tr><th>Tag</th><th>Reichw.</th><th>organisch</th><th>+ / −</th><th>🔖 / ↗</th></tr></thead><tbody>' +
         ins.slice().reverse().map((x) => "<tr><td>" + app.fmtDate(x.day) + "</td><td>" + app.num(x.reach) + "</td><td>" + app.num(x.reachOrganic) + "</td><td>+" + app.num(x.follows) + " / −" + app.num(x.unfollows) + "</td><td>" + app.num(x.saves) + " / " + app.num(x.shares) + "</td></tr>").join("") +
         "</tbody></table></div>", { tip: "„Werbung“ ist Reichweite aus bezahlten Anzeigen. „organisch“ ist, was dein Content allein schafft. „+ / −“ = neue Follower / Unfollows, 🔖 / ↗ = Saves / Shares." });
+    }
+    // Zielgruppe (Follower-Demografie)
+    const dm = d.demo || {};
+    if (dm.age || dm.country) {
+      const top = (arr, n) => (arr || []).slice().sort((x, y) => y.v - x.v).slice(0, n), tot = (arr) => (arr || []).reduce((s2, e) => s2 + e.v, 0) || 1;
+      let land; try { land = new Intl.DisplayNames(["de"], { type: "region" }); } catch (e) { land = null; }
+      const bars = (arr, n, name) => { const t = tot(arr), rows = n ? top(arr, n) : arr, mx = Math.max(1, ...rows.map((e) => e.v));
+        return rows.map((e) => '<div class="roi-row"><div class="roi-h"><span>' + app.esc(name ? name(e.k) : e.k) + '</span><span class="muted small">' + app.pct(e.v / t) + '</span></div><div class="roi-bar"><i style="width:' + Math.round(e.v / mx * 100) + '%"></i></div></div>').join(""); };
+      const g = {}; (dm.gender || []).forEach((e) => (g[e.k] = e.v)); const known = (g.F || 0) + (g.M || 0);
+      html += app.card("Zielgruppe <small>" + app.fmtDate(dm.day) + "</small>",
+        (known ? '<div class="stats">' + app.stat("Männer", app.pct((g.M || 0) / known)) + app.stat("Frauen", app.pct((g.F || 0) / known)) + app.stat("Top-Alter", app.esc((top(dm.age, 1)[0] || {}).k || "–")) + app.stat("Top-Land", app.esc((top(dm.country, 1)[0] || {}).k || "–")) + "</div>" : "") +
+        (dm.age ? '<h4 class="sub">Alter</h4>' + bars(dm.age, 0) : "") +
+        (dm.country ? '<h4 class="sub">Länder</h4>' + bars(dm.country, 6, (k2) => { try { return land ? land.of(k2) : k2; } catch (e) { return k2; } }) : "") +
+        (dm.city ? '<h4 class="sub">Städte</h4>' + bars(dm.city, 6, (k2) => k2.split(",")[0]) : ""),
+        { tip: "Wer dir folgt, laut Instagram. Geschlecht nur von Followern, bei denen Instagram es kennt. Länder und Städte: Anteil unter den von Instagram gelieferten Top-Einträgen. Genau diese Zahlen fragen Marken bei Kooperationen ab." });
     }
     el.innerHTML = html;
 

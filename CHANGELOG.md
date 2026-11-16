@@ -14,7 +14,7 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 ## Fahrplan (Schritt für Schritt, nach jedem Schritt anschauen)
 1. Aufräumen: Doppeltes und zu viele Texte raus ✅ (15.11.)
 2. Neue Growth-Kennzahlen A+B: „Diese Woche“, Netto-Follower pro Tag, Funnel ✅ (15.11.)
-3. Beste Posting-Zeit (Make) und Reels: durchschnittliche Wiedergabedauer (eigener Reels-Zweig im Make-Szenario „Posts & Kommentare sammeln“) – als Nächstes
+3. Zielgruppe und Reels-Wiedergabedauer ✅ (16.11.), Beste Posting-Zeit zurückgestellt (zu wenig Posts)
 4. Reiter für Reiter neu ordnen, beginnend mit der Übersicht
 - Geparkt: „Nächster geplanter Post“ – erst möglich, wenn es in Make ein Szenario zum automatischen Posten gibt.
 
@@ -28,6 +28,12 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 16.11.2026 – v1.10.0 (Zielgruppe, Reels-Wiedergabedauer)
+- Make „Konto-Insights sammeln“: 4 neue Zweige für Follower-Demografie (Alter, Geschlecht, Land, Stadt), Datensätze `demo_age`, `demo_gender`, `demo_country`, `demo_city` im Data Store 208884 (Format `Name=Wert|…`).
+- Make „Posts & Kommentare sammeln“: Router nach den Post-Insights, neuer Zweig nur für Reels (Ø Wiedergabedauer, gesamte Wiedergabezeit in ms), Datensatz `reel_<id>` mit product `REELWT` im Data Store 208242.
+- App, Content: neue Karten „Reels“ (Ø Wiedergabe je Reel) und „Zielgruppe“ (Männer/Frauen, Alter, Top-Länder, Top-Städte).
+- Zurückgestellt: Beste Posting-Zeit. Meta liefert die Online-Zeiten der Follower im Make-Baustein nicht, eigene Auswertung erst mit mehr Posts sinnvoll.
 
 ### 16.11.2026 – v1.9.0 (Übersicht aufgeräumt, Follower pro Aktion)
 - Übersicht neu geordnet: Ergebnis zuerst (Heute, Diese Woche), dann Zu tun, dann Session, Fokus, neuester Post. Laufband mit Kommentaren entfernt (inkl. CSS, kein toter Code).

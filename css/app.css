@@ -266,3 +266,4 @@ input:focus, textarea:focus { outline: none; border-color: rgba(240,124,30,.7); 
 .roi-h { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .roi-bar { height: 6px; border-radius: 4px; background: rgba(255,255,255,.07); overflow: hidden; } .roi-bar i { display: block; height: 100%; border-radius: 4px; background: var(--accent); }
 .roi-s { margin-top: 6px; }
+.sub { margin: 16px 0 2px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }

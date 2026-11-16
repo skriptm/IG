@@ -11,6 +11,7 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - Merkliste und Gegenbesuch-Warteschlange sind eine gemeinsame Liste „Als Nächstes besuchen“ im Reiter Kontakte.
 - Moody-Cinematic-Look (dunkel, Glas-Karten, Orange als Akzent).
 - Make-Credits sparen: Start und Rückkehr in die App laden nur nach, wenn die Daten älter als 30 Minuten sind (CONFIG.maxAgeMin). ↻ und Ziehen laden immer. Die App lädt alles mit einem Aufruf (`init`).
+- Browser-Aufgaben (Tests, Instagram) laufen immer über den Windows-Rechner, nie über das MacBook.
 
 ## Fahrplan (Schritt für Schritt, nach jedem Schritt anschauen)
 1. Aufräumen: Doppeltes und zu viele Texte raus ✅ (15.11.)

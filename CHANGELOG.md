@@ -22,12 +22,20 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - keine
 
 ## Make-Szenarien (Team 1047609)
-- IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get.
+- IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get, prep, log.
 - IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
 - IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, Data Store 208242.
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 16.11.2026 – v1.8.0 (Token-Sparmodus)
+- Make „IG App API“: neue Aktionen `prep` (Session-Vorbereitung: Limits, Listen, Sperrlisten, Gegenbesuch, offene Follows) und `log` (Session-Abschluss: Log, Stats, Conversions, Follow-back, Merkliste und Gegenbesuch aufräumen). Statistik liegt jetzt im Datenspeicher 209784 (Schlüssel `stats`, Tageslog `log-YYYY-MM-DD`), nicht mehr in Drive. Die App liest weiter über `stats`, gleiches JSON-Format.
+- Skill auf ca. ein Drittel gekürzt (Version 2): 1 Aufruf zum Start, 1 Aufruf zum Ende, Browser-Helfer in localStorage, ein Call pro Post.
+- Kommentare: nur 2 bis 4 Wörter plus ein Smiley hinten, vom Helfer aus einem Pool gewählt (kein Modell nötig). Sessions laufen auf einem günstigeren Modell.
+- Top-Fans-Automatik entfernt (Gegenbesuch deckt Kommentatoren ab).
+- App: Hinweistexte ohne „Drive“.
+- Wöchentliche Token-Auswertung als geplante Aufgabe.
 
 ### 15.11.2026 – v1.7.0 (Growth-Kennzahlen A+B)
 - Übersicht: neue Karte „Diese Woche“ (Netto-Follower, Reichweite organisch, Interaktionen, Profilaufrufe; Vergleich mit Vorwoche, sobald 14 Tage Daten da sind, ca. ab 25.11.).

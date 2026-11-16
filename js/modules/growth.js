@@ -5,7 +5,7 @@ App.register({
   render(el, d, app) {
     const s = d.stats;
     if (!s) {
-      el.innerHTML = netCards(d, app) + app.card("Wachstum", '<p>Die Follower-Kurve und der Engagement-Verlauf kommen aus der Drive-Statistik des Engagement-Skills.</p><p class="note">⚠️ ' + app.esc(d.statsError || "Noch keine Daten") + "</p>");
+      el.innerHTML = netCards(d, app) + app.card("Wachstum", '<p>Die Follower-Kurve und der Engagement-Verlauf kommen aus der Statistik des Engagement-Skills.</p><p class="note">⚠️ ' + app.esc(d.statsError || "Noch keine Daten") + "</p>");
       drawNet(el, d, app);
       return;
     }

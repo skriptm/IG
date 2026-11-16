@@ -163,7 +163,7 @@
         if (all.status === "rejected") throw all.reason;
         const raw = all.value;
         if (stats.status === "fulfilled" && stats.value && stats.value.sessions) raw.stats = stats.value;
-        else raw.statsError = stats.status === "rejected" ? "Drive-Statistik nicht erreichbar" : "Noch keine Drive-Statistik";
+        else raw.statsError = stats.status === "rejected" ? "Statistik nicht erreichbar" : "Noch keine Statistik";
         if (cfg.status === "fulfilled" && cfg.value && typeof cfg.value === "object" && Object.keys(cfg.value).length) raw.cfg = cfg.value;
         else { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); if (old && old.cfg) raw.cfg = old.cfg; }
         if (sess.status === "fulfilled" && sess.value) { raw.session = sess.value.session || {}; }

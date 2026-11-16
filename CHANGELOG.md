@@ -10,6 +10,7 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - Entfernte Funktionen werden immer komplett aus dem Code gelöscht (kein toter Code).
 - Merkliste und Gegenbesuch-Warteschlange sind eine gemeinsame Liste „Als Nächstes besuchen“ im Reiter Kontakte.
 - Moody-Cinematic-Look (dunkel, Glas-Karten, Orange als Akzent).
+- Make-Credits sparen: Start und Rückkehr in die App laden nur nach, wenn die Daten älter als 30 Minuten sind (CONFIG.maxAgeMin). ↻ und Ziehen laden immer. Die App lädt alles mit einem Aufruf (`init`).
 
 ## Fahrplan (Schritt für Schritt, nach jedem Schritt anschauen)
 1. Aufräumen: Doppeltes und zu viele Texte raus ✅ (15.11.)
@@ -19,16 +20,24 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - Geparkt: „Nächster geplanter Post“ – erst möglich, wenn es in Make ein Szenario zum automatischen Posten gibt.
 
 ## Offene Fragen an André
-- keine
+- Alte Routen `all`, `stats`, `cfg_get`, `sess_get` in „IG App API“ werden von der App nicht mehr genutzt. Beim nächsten Make-Termin (zusammen mit der `log`-Antwort) löschen, nach ein paar Tagen Beobachtung.
 
 ## Make-Szenarien (Team 1047609)
-- IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get, prep, log.
+- IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get, prep, log. `all`, `stats`, `cfg_get`, `sess_get` nutzt die App seit v1.12.0 nicht mehr.
+- IG App Init (10171545): eigener Webhook (Hook 4517389), liefert Posts, Insights, Gegenbesuch, Statistik, Einstellungen und Session in einem Aufruf. 14 Operationen statt 20.
 - IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
 - IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, Data Store 208242.
 - IG Hub-Alarm (10170662): täglich 18:45, Datensatz `fresh` im Data Store 208242.
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 16.11.2026 – v1.12.0 (Make-Credits sparen)
+- Auslöser: Make-Plan hat 14.000 Credits pro Monat (Reset 12.12.), am 16.11. waren 4.176 verbraucht. Jeder App-Start und jede Rückkehr in den Vordergrund löste 4 Aufrufe aus (20 Credits), teils mehrfach pro Minute.
+- App: automatisches Laden nur, wenn die Daten älter als 30 Minuten sind. ↻, Ziehen und Code speichern laden immer. Dafür `fresh()` und der Parameter `auto` in `load()`.
+- App: ein Aufruf `init` statt `all` + `stats` + `cfg_get` + `sess_get`. Alter Ladecode gelöscht.
+- Make: neues Szenario „IG App Init“ (10171545, Hook 4517389), 14 Operationen pro Aufruf. Getestet: Posts, Insights, Gegenbesuch, Stats, Einstellungen, Session kommen korrekt an.
+- Messung: Stand 16.11. ca. 10:30 waren 4.176,5 von 14.000 Credits verbraucht. Am 19.11. Tagesverbrauch im Make-Dashboard prüfen, Ziel unter 400 pro Tag.
 
 ### 16.11.2026 – v1.11.0 (Hub-Alarm)
 - Make: neues Szenario „IG Hub-Alarm“ (10170662), täglich 18:45. Liest Hubs und Kernliste aus den Einstellungen, holt je Konto die 4 neuesten Posts (nur Business-/Creator-Konten) und schreibt alle Posts der letzten 26 Stunden als Datensatz `fresh` (product `FRESH`, Format `handle|zeit|link;…`) in den Data Store 208242. Ca. 35 Operationen pro Lauf.

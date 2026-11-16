@@ -50,13 +50,14 @@
   async function call(params, timeout = 45000, post) {
     const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), timeout);
     const all = Object.assign({ k: settings.code }, params);
+    const api = params.a === "init" ? CONFIG.init : CONFIG.api;
     try {
       let r;
       if (post) {
         const body = new URLSearchParams(); Object.entries(all).forEach(([k, v]) => body.set(k, v == null ? "" : v));
-        r = await fetch(CONFIG.api, { method: "POST", body, signal: ctl.signal, cache: "no-store" });
+        r = await fetch(api, { method: "POST", body, signal: ctl.signal, cache: "no-store" });
       } else {
-        const u = new URL(CONFIG.api); Object.entries(all).forEach(([k, v]) => u.searchParams.set(k, v == null ? "" : v)); u.searchParams.set("_", Date.now());
+        const u = new URL(api); Object.entries(all).forEach(([k, v]) => u.searchParams.set(k, v == null ? "" : v)); u.searchParams.set("_", Date.now());
         r = await fetch(u.toString(), { signal: ctl.signal, cache: "no-store" });
       }
       const txt = await r.text();
@@ -160,8 +161,17 @@
       clearTimeout(t._t); if (ms !== 0) t._t = setTimeout(() => (t.className = "toast"), ms || 2600);
     },
 
-    /* deep = true: vorher Instagram neu abfragen (Aktualisieren-Knopf / Ziehen) */
-    async load(deep) {
+    /* Daten aus dem Zwischenspeicher noch frisch genug? (spart Make-Credits) */
+    fresh() {
+      const c = LS.get("cache", null); if (!c || !c.ts) return false;
+      const age = Date.now() - Date.parse(c.ts);
+      return age >= 0 && age < CONFIG.maxAgeMin * 6e4;
+    },
+
+    /* deep = true: vorher Instagram neu abfragen (Aktualisieren-Knopf / Ziehen)
+       auto = true: automatischer Aufruf (Start, Rückkehr in die App), lädt nur bei veralteten Daten */
+    async load(deep, auto) {
+      if (auto && this.data && this.fresh()) return;
       if (this.busy) return; this.busy = true;
       const btn = document.getElementById("refresh-btn"); btn.classList.add("spin");
       try {
@@ -170,14 +180,10 @@
           this.toast("Instagram wird abgefragt …", "", 0);
           try { await call({ a: "refresh" }, 90000); } catch (e) { if (e.code === 403) throw e; this.toast("Instagram nicht erreichbar, zeige gespeicherte Daten", "bad"); }
         }
-        const [all, stats, cfg, sess] = await Promise.allSettled([call({ a: "all" }), call({ a: "stats" }, 30000), call({ a: "cfg_get" }, 30000), call({ a: "sess_get" }, 30000)]);
-        if (all.status === "rejected") throw all.reason;
-        const raw = all.value;
-        if (stats.status === "fulfilled" && stats.value && stats.value.sessions) raw.stats = stats.value;
-        else raw.statsError = stats.status === "rejected" ? "Statistik nicht erreichbar" : "Noch keine Statistik";
-        if (cfg.status === "fulfilled" && cfg.value && typeof cfg.value === "object" && Object.keys(cfg.value).length) raw.cfg = cfg.value;
-        else { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); if (old && old.cfg) raw.cfg = old.cfg; }
-        if (sess.status === "fulfilled" && sess.value) { raw.session = sess.value.session || {}; }
+        const raw = await call({ a: "init" });
+        if (!(raw.stats && raw.stats.sessions)) { raw.statsError = "Noch keine Statistik"; delete raw.stats; }
+        if (!(raw.cfg && typeof raw.cfg === "object" && Object.keys(raw.cfg).length)) { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); raw.cfg = old && old.cfg ? old.cfg : null; }
+        raw.session = raw.session || {};
         LS.set("cache", raw);
         this.data = normalize(raw);
         if (deep) this.toast("Aktuell ✓");
@@ -285,9 +291,9 @@
       this.go(start); this.renderHero();
       document.getElementById("refresh-btn").addEventListener("click", () => this.load(true));
       window.addEventListener("hashchange", () => { const id = location.hash.slice(1); if (id && id !== this.current) this.go(id); });
-      document.addEventListener("visibilitychange", () => { if (!document.hidden) this.load(); });
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) this.load(false, true); });
       this.pullToRefresh(); this.dust();
-      this.load();
+      this.load(false, true);
       if ("serviceWorker" in navigator) { const had = !!navigator.serviceWorker.controller; let done = false; navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !done) { done = true; location.reload(); } }); navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}); document.addEventListener("visibilitychange", () => { if (!document.hidden) navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {}); }); }
     },
     normalize

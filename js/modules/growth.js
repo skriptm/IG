@@ -44,16 +44,18 @@ App.register({
     }
 
     // Bringt das Skript Follower? (je Bereich)
-    const area = (via, block) => block === "follow" ? "Follows" : !via ? "Ohne Angabe" : via[0] === "@" ? "Hubs" : via[0] === "#" ? "Hashtags" : /^Feed/.test(via) ? "Startseite" : /^Gegenbesuch/.test(via) ? "Gegenbesuch" : /^(Merkliste|Kernliste|Friends|Following)$/.test(via) ? "Kernliste & Merkliste" : "Sonstiges";
+    const area = (via, block) => block === "follow" ? "Follows" : !via ? "Ohne Angabe" : via[0] === "@" ? "Hub " + via : via[0] === "#" ? "Hashtags" : /^Feed/.test(via) ? "Startseite" : /^Gegenbesuch/.test(via) ? "Gegenbesuch" : /^(Merkliste|Kernliste|Friends|Following)$/.test(via) ? "Kernliste & Merkliste" : "Sonstiges";
     const roi = {}; const get = (a) => roi[a] || (roi[a] = { area: a, comments: 0, conv: 0 });
     s.activity.forEach((a) => { if (a.act === "comment") get(area(a.via, a.block)).comments++; });
     s.conversions.forEach((c) => get(area(c.via, c.block)).conv++);
-    const roiRows = Object.values(roi).sort((a, b) => b.comments - a.comments);
+    const roiRows = Object.values(roi).map((r) => Object.assign(r, { rate: r.comments ? r.conv / r.comments * 100 : 0 })).sort((a, b) => b.comments - a.comments);
+    const roiMax = Math.max(1, ...roiRows.map((r) => r.rate));
     if (roiRows.length) html += app.card("Bringt das Skript Follower?",
       '<p class="lead">Seit Messbeginn <b>' + app.num(totalComments) + "</b> Kommentare, <b>" + app.num(s.sessions.reduce((a, x) => a + (x.new || 0), 0)) + "</b> neue Follower, davon <b>" + conv + "</b> direkt zurückführbar.</p>" +
-      '<div class="table-wrap"><table class="t"><thead><tr><th>Bereich</th><th>Kommentare</th><th>Follower</th><th>pro Follower</th></tr></thead><tbody>' +
-      roiRows.map((r) => "<tr><td>" + app.esc(r.area) + "</td><td>" + r.comments + "</td><td>" + r.conv + "</td><td>" + (r.conv ? app.d1(r.comments / r.conv) : "–") + "</td></tr>").join("") + "</tbody></table></div>",
-      { tip: "„pro Follower“ = wie viele Kommentare ein Bereich im Schnitt für einen neuen Follower braucht. Weniger ist besser." });
+      '<div class="roi">' + roiRows.map((r) => '<div class="roi-row"><div class="roi-h"><span>' + app.esc(r.area) + '</span><span class="muted small">' + r.comments + " Komm. · " + r.conv + " Follower</span></div>" +
+        '<div class="roi-bar"><i style="width:' + Math.round(r.rate / roiMax * 100) + '%"></i></div>' +
+        '<div class="roi-s small">' + (r.comments < 30 ? '<span class="muted">zu wenig Daten (ab 30 Kommentaren aussagekräftig)</span>' : r.conv ? "<b>" + app.d1(r.rate) + "</b> Follower pro 100 Kommentare" : "bisher kein Follower") + "</div></div>").join("") + "</div>",
+      { tip: "Wie viele neue Follower ein Bereich pro 100 Kommentare bringt. Längerer Balken = lohnt sich mehr. Unter 30 Kommentaren ist der Wert noch Zufall." });
 
     if (s.conversions.length) {
       html += app.card("Conversions <span class=\"pill\">" + conv + "</span>", app.more(s.conversions.map((c) =>

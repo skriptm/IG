@@ -1,4 +1,4 @@
-/* Übersicht: Session, Tagesringe, Streak, Zu tun, Fokus, neuester Post */
+/* Übersicht: Heute, Woche, Zu tun, Session, Fokus, neuester Post */
 
 /* Gemeinsame Kennzahlen (auch vom Content-Tab genutzt) */
 App.kpi = function (d) {
@@ -61,7 +61,7 @@ App.register({
     const usedH = Math.min(hourTs.length, hourCap);
     const rounds = todaySessions.length + (running ? 1 : 0);
     const segs = Array.from({ length: hourCap }, (_, i) => '<i class="' + (i < usedH ? "on" : "") + '" style="--i:' + i + '"></i>').join("");
-    let html = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
+    const cSession = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
       '<div style="margin-bottom:12px">' + stLine + "</div>" +
       '<div class="hourbox' + (usedH >= hourCap ? " full" : "") + '">' +
         '<div class="hb-top"><span class="stat-l">Diese Stunde</span><span class="hb-v"><b class="cu" data-to="' + usedH + '">0</b><small> / ' + hourCap + " Kommentare</small></span></div>" +
@@ -71,7 +71,7 @@ App.register({
       (cfg.paused ? app.note("Engagement ist pausiert (Einstellungen → Basis).") : ""), { id: "session", tip: "Start im Claude-Chat mit „Session starten“. Sicherheitsnetz: " + dayCap + " Kommentare am Tag, " + hourCap + " pro Stunde, danach nur noch Likes." });
 
     const newF = sum("new");
-    html += app.card("Heute",
+    const cToday = app.card("Heute",
       '<div class="rings">' +
         Charts.ring(usedC, dayCap, "Kommentare", "var(--accent)") +
         Charts.ring(usedL, null, "Likes", "var(--sand)") +
@@ -83,27 +83,26 @@ App.register({
       '<div class="days">' + week.map((on, i) => "<i" + (on ? ' class="on"' : "") + ' style="--i:' + i + '"></i>').join("") + "</div></div></div>" +
       (d.statsError ? '<p class="note">⚠️ ' + app.esc(d.statsError) + "</p>" : ""));
 
-    // Zu tun + Ticker
-    const latest = d.allComments.slice(0, 12);
-    html += app.card("Zu tun",
+    // Zu tun
+    const cTodo = app.card("Zu tun",
       '<div class="todo">' +
         '<a href="#" data-go="content" data-anchor="open"><div><div class="t-l">Unbeantwortet</div><div class="t-s">Kommentare unter deinen Posts</div></div><span class="badge' + (d.openComments.length ? " hot" : "") + '">' + d.openComments.length + "</span></a>" +
         '<a href="#" data-go="contacts"><div><div class="t-l">Gegenbesuch</div><div class="t-s">' + (gbQ ? gbQ + " vorgemerkt" : "warten auf Like + Kommentar") + '</div></div><span class="badge' + (gbOpen ? " hot" : "") + '">' + gbOpen + "</span></a>" +
-      "</div>" +
-      (latest.length ? '<div class="ticker"><div class="track" style="--dur:' + Math.max(25, latest.length * 6) + 's">' + [...latest, ...latest].map((c) => "<span><b>@" + app.esc(c.h) + "</b> " + app.esc(c.text) + "</span>").join("") + "</div></div>" : ""));
+      "</div>");
 
     // Fokus diese Woche
     const adv = [];
     if (k.storyAvg && k.tplAvg) adv.push(k.storyAvg > k.tplAvg * 1.15 ? "Posts mit Story-Caption erreichen im Schnitt <b>" + app.num(k.storyAvg) + "</b> Konten, mit Template-Caption <b>" + app.num(k.tplAvg) + "</b>. Teste die nächsten 3 Posts mit einer kleinen Geschichte statt dem Standard-Block." : "Story- und Template-Captions liegen bei der Reichweite nah beieinander. Die Caption ist gerade nicht der größte Hebel.");
     if (k.signalRecent != null) adv.push(k.signalRecent < 10 ? "Auf 1.000 erreichte Konten kommen nur <b>" + app.d1(k.signalRecent) + "</b> Saves und Shares. Posts, die man speichert oder weiterschickt (Spot-Infos, Anfahrt, beste Uhrzeit, Ausrüstung), heben diesen Wert am stärksten." : "Saves und Shares liegen bei <b>" + app.d1(k.signalRecent) + "</b> pro 1.000 Reichweite. Mehr Posts in dieser Art machen.");
     if (k.reachShare != null && k.reachShare < 0.1) adv.push("Nur <b>" + app.pct(k.reachShare) + "</b> deiner Follower sehen einen Post. Reels sind der Weg zu Leuten, die dir noch nicht folgen.");
-    if (adv.length) html += app.card("Fokus diese Woche", '<p class="advice1">' + adv[0] + "</p>");
+    const cFocus = adv.length ? app.card("Fokus diese Woche", '<p class="advice1">' + adv[0] + "</p>") : "";
 
+    let cWeek = "";
     const W = App.week(d);
     if (W) {
       const cmp = (a, b, signed) => (b == null ? "" : a == null ? "" : (() => { const df = a - b; return '<span class="' + (df >= 0 ? "up" : "down") + '">' + (df >= 0 ? "▲ " : "▼ ") + (signed ? app.num(Math.abs(df)) : (b ? Math.abs(Math.round((df / b) * 100)) + " %" : "–")) + "</span> vs. Vorwoche"; })());
       const c = W.cur, pv = W.prev;
-      html += app.card("Diese Woche <small>" + app.fmtDate(c.from) + "–" + app.fmtDate(c.to) + "</small>",
+      cWeek = app.card("Diese Woche <small>" + app.fmtDate(c.from) + "–" + app.fmtDate(c.to) + "</small>",
         '<div class="stats">' +
           app.stat("Netto-Follower", '<span class="' + (c.net >= 0 ? "up" : "down") + '">' + app.signed(c.net) + "</span>", pv ? cmp(c.net, pv.net, true) : "+" + app.num(c.follows) + " / −" + app.num(c.unfollows)) +
           app.stat("Reichweite organisch", app.num(c.reachOrg), pv ? cmp(c.reachOrg, pv.reachOrg) : "Ø " + app.num(Math.round(c.reachOrg / c.n)) + " pro Tag") +
@@ -114,11 +113,12 @@ App.register({
     }
 
     const p = d.posts[0];
-    if (p) html += app.card("Neuester Post",
+    const cPost = p ? app.card("Neuester Post",
       '<a class="post-hero" href="' + app.esc(p.link) + '" target="_blank" rel="noopener"><div class="post-meta"><span class="tag">' + p.format + "</span> " + app.fmtDate(p.ts, true) + "</div>" +
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
-      '<div class="stats mini">' + app.stat("Reichw.", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Komm.", app.num(p.comments)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>");
-    el.innerHTML = html;
+      '<div class="stats mini">' + app.stat("Reichw.", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Komm.", app.num(p.comments)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>") : "";
+    // Reihenfolge: erst Ergebnis (Heute, Woche), dann Aufgaben, dann Technik
+    el.innerHTML = cToday + cWeek + cTodo + cSession + cFocus + cPost;
     el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));
 
     // Stunden-Countdown, läuft live mit

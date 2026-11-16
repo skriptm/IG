@@ -14,7 +14,7 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 ## Fahrplan (Schritt für Schritt, nach jedem Schritt anschauen)
 1. Aufräumen: Doppeltes und zu viele Texte raus ✅ (15.11.)
 2. Neue Growth-Kennzahlen A+B: „Diese Woche“, Netto-Follower pro Tag, Funnel ✅ (15.11.)
-3. Reels: durchschnittliche Wiedergabedauer (eigener Reels-Zweig im Make-Szenario „Posts & Kommentare sammeln“) – als Nächstes
+3. Beste Posting-Zeit (Make) und Reels: durchschnittliche Wiedergabedauer (eigener Reels-Zweig im Make-Szenario „Posts & Kommentare sammeln“) – als Nächstes
 4. Reiter für Reiter neu ordnen, beginnend mit der Übersicht
 - Geparkt: „Nächster geplanter Post“ – erst möglich, wenn es in Make ein Szenario zum automatischen Posten gibt.
 
@@ -28,6 +28,11 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 16.11.2026 – v1.9.0 (Übersicht aufgeräumt, Follower pro Aktion)
+- Übersicht neu geordnet: Ergebnis zuerst (Heute, Diese Woche), dann Zu tun, dann Session, Fokus, neuester Post. Laufband mit Kommentaren entfernt (inkl. CSS, kein toter Code).
+- Wachstum, „Bringt das Skript Follower?“: Balken je Bereich mit Follower pro 100 Kommentare, Hubs einzeln aufgeführt, Hinweis „zu wenig Daten“ unter 30 Kommentaren.
+- Fahrplan: nächste Schritte Beste Posting-Zeit, Reels-Wiedergabedauer (Make), danach Umschalter für Van & Venture (Konten-Auswahl, Daten je Konto getrennt).
 
 ### 16.11.2026 – v1.8.0 (Token-Sparmodus)
 - Make „IG App API“: neue Aktionen `prep` (Session-Vorbereitung: Limits, Listen, Sperrlisten, Gegenbesuch, offene Follows) und `log` (Session-Abschluss: Log, Stats, Conversions, Follow-back, Merkliste und Gegenbesuch aufräumen). Statistik liegt jetzt im Datenspeicher 209784 (Schlüssel `stats`, Tageslog `log-YYYY-MM-DD`), nicht mehr in Drive. Die App liest weiter über `stats`, gleiches JSON-Format.

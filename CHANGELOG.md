@@ -33,6 +33,9 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 
 ## Verlauf
 
+### 16.11.2026 – Arbeitsregeln
+- Neu: `CLAUDE.md` im Repo. Claude Code liest damit automatisch zuerst dieses Protokoll und hält sich an die Regeln (kein toter Code, Version hochzählen, Protokoll pflegen, Make-Credits, Browser nur über Windows).
+
 ### 16.11.2026 – v1.12.0 (Make-Credits sparen)
 - Auslöser: Make-Plan hat 14.000 Credits pro Monat (Reset 12.12.), am 16.11. waren 4.176 verbraucht. Jeder App-Start und jede Rückkehr in den Vordergrund löste 4 Aufrufe aus (20 Credits), teils mehrfach pro Minute.
 - App: automatisches Laden nur, wenn die Daten älter als 30 Minuten sind. ↻, Ziehen und Code speichern laden immer. Dafür `fresh()` und der Parameter `auto` in `load()`.

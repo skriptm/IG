@@ -90,6 +90,16 @@ App.register({
         '<a href="#" data-go="contacts"><div><div class="t-l">Gegenbesuch</div><div class="t-s">' + (gbQ ? gbQ + " vorgemerkt" : "warten auf Like + Kommentar") + '</div></div><span class="badge' + (gbOpen ? " hot" : "") + '">' + gbOpen + "</span></a>" +
       "</div>");
 
+    // Hub-Alarm: neue Posts von Hubs und Kernliste, pro Account nur der neueste
+    const done = new Set(s ? s.activity.filter((x) => x.sc).map((x) => x.sc) : []), seenH = new Set();
+    const fresh = (d.fresh || []).filter((x) => !seenH.has(x.h) && seenH.add(x.h));
+    const openF = fresh.filter((x) => !done.has(x.sc));
+    const cFresh = d.freshAt ? app.card("Neu bei Hubs & Kernliste <span class=\"pill" + (openF.length ? " accent" : "") + "\">" + openF.length + "</span>",
+      fresh.length ? app.more(fresh.map((x) => '<li><a href="' + app.esc(x.link) + '" target="_blank" rel="noopener"><b>@' + app.esc(x.h) + "</b></a>" +
+        '<span class="muted">' + (x.hub ? "Hub" : "Kernliste") + " · " + app.esc(app.rel(x.ts)) + "</span>" +
+        '<span class="right">' + (done.has(x.sc) ? '<span class="pill green">✓ kommentiert</span>' : '<span class="pill">offen</span>') + "</span></li>")) : '<p class="muted">Keine neuen Posts in den letzten 26 Stunden.</p>',
+      { tip: "Make prüft täglich um 18:45 alle Hubs und die Kernliste. Die nächste Session arbeitet diese Liste zuerst ab. Stand: " + app.fmtDate(d.freshAt, true) + ". Konten ohne Business-Profil fehlen hier." }) : "";
+
     // Fokus diese Woche
     const adv = [];
     if (k.storyAvg && k.tplAvg) adv.push(k.storyAvg > k.tplAvg * 1.15 ? "Posts mit Story-Caption erreichen im Schnitt <b>" + app.num(k.storyAvg) + "</b> Konten, mit Template-Caption <b>" + app.num(k.tplAvg) + "</b>. Teste die nächsten 3 Posts mit einer kleinen Geschichte statt dem Standard-Block." : "Story- und Template-Captions liegen bei der Reichweite nah beieinander. Die Caption ist gerade nicht der größte Hebel.");
@@ -118,7 +128,7 @@ App.register({
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
       '<div class="stats mini">' + app.stat("Reichw.", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Komm.", app.num(p.comments)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>") : "";
     // Reihenfolge: erst Ergebnis (Heute, Woche), dann Aufgaben, dann Technik
-    el.innerHTML = cToday + cWeek + cTodo + cSession + cFocus + cPost;
+    el.innerHTML = cToday + cWeek + cTodo + cFresh + cSession + cFocus + cPost;
     el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));
 
     // Stunden-Countdown, läuft live mit

@@ -25,9 +25,16 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get, prep, log.
 - IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
 - IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, Data Store 208242.
+- IG Hub-Alarm (10170662): täglich 18:45, Datensatz `fresh` im Data Store 208242.
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 16.11.2026 – v1.11.0 (Hub-Alarm)
+- Make: neues Szenario „IG Hub-Alarm“ (10170662), täglich 18:45. Liest Hubs und Kernliste aus den Einstellungen, holt je Konto die 4 neuesten Posts (nur Business-/Creator-Konten) und schreibt alle Posts der letzten 26 Stunden als Datensatz `fresh` (product `FRESH`, Format `handle|zeit|link;…`) in den Data Store 208242. Ca. 35 Operationen pro Lauf.
+- App, Übersicht: Karte „Neu bei Hubs & Kernliste“ mit offen/kommentiert.
+- Skill: Session arbeitet zuerst die `fresh`-Liste ab (Kernliste direkt per Post-Link, Hubs nur bei neuem Post).
+- Entscheidung André: keine Push-Meldung, nur Dashboard, Prüfung einmal täglich vor der Abendrunde.
 
 ### 16.11.2026 – v1.10.0 (Zielgruppe, Reels-Wiedergabedauer)
 - Make „Konto-Insights sammeln“: 4 neue Zweige für Follower-Demografie (Alter, Geschlecht, Land, Stadt), Datensätze `demo_age`, `demo_gender`, `demo_country`, `demo_city` im Data Store 208884 (Format `Name=Wert|…`).

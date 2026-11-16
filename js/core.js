@@ -76,7 +76,12 @@
     const rawPosts = (raw.posts || []).map((r) => r.data || r).filter((p) => p && p.id);
     const lastRun = Math.max(0, ...rawPosts.map((p) => Date.parse(p.updated) || 0));
     const reelWt = {}; rawPosts.filter((p) => p.product === "REELWT").forEach((p) => { reelWt[p.id] = kv(p.metrics); });
-    const posts = rawPosts.filter((p) => p.product !== "STORY" && p.product !== "REELWT").map((p) => {
+    // Hub-Alarm: neue Posts von Hubs und Kernliste (Make, täglich 18:45)
+    const fr = rawPosts.find((p) => p.product === "FRESH"), hubSet = new Set(((cfg && cfg.hubs) || []).map((x) => String(x).toLowerCase()));
+    const fresh = fr ? String(fr.metrics || "").split(";").filter(Boolean).map((e) => { const [h, ts, link] = e.split("|"); return { h, ts, link, sc: (String(link).match(/\/(?:p|reel)\/([\w-]+)/) || [])[1] || "", hub: hubSet.has(String(h).toLowerCase()) }; })
+      .filter((x) => x.h && x.link && !noGo.has(String(x.h).toLowerCase())).sort((a, b) => (a.ts < b.ts ? 1 : -1)) : [];
+    const freshAt = fr ? fr.updated : null;
+    const posts = rawPosts.filter((p) => !["STORY", "REELWT", "FRESH"].includes(p.product)).map((p) => {
       const m = kv(p.metrics), wt = reelWt[p.id];
       const commentList = String(p.comments || "").split(";").filter(Boolean).map((c) => { const [hh, ts, text, id, rep] = c.split("|"); return { h: hh, ts, text: dec(text), id, replies: Number(rep) || 0 }; });
       const reach = m.reach || 0, inter = m.total_interactions || (Number(p.likes) || 0) + (Number(p.comments_count) || 0);
@@ -138,7 +143,7 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, demo, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    return { posts, insights, demo, fresh, freshAt, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }

@@ -14,8 +14,8 @@ App.register({
     const totalComments = s.sessions.reduce((a, x) => a + (x.comments || 0), 0);
     const conv = s.conversions.length;
     const back = s.follows.filter((f) => f.status === "back").length;
-    const open = s.follows.filter((f) => f.status !== "back");
-    const unf = open.filter((f) => app.daysAgo(f.ts) >= CONFIG.unfollowAfterDays);
+    const ud = app.unfDays();
+    const unf = s.follows.filter((f) => app.followState(f).key === "due");
 
     let html = netCards(d, app);
     html += app.card("Follower",
@@ -65,11 +65,11 @@ App.register({
     html += app.card("Gefolgt <span class=\"pill\">" + s.follows.length + "</span>", s.follows.length ? app.more(s.follows.map((f) =>
       '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + "</b></a>" +
       '<span class="muted">' + (f.f ? app.num(f.f) + " Follower · " : "") + app.esc(f.via || "") + "</span>" +
-      '<span class="right">' + (f.status === "back" ? '<span class="pill green">folgt zurück</span>' : '<span class="pill">' + app.daysAgo(f.ts) + " T. offen</span>") + "</span></li>")) : '<p class="muted">Noch niemandem gefolgt.</p>');
+      '<span class="right">' + app.followState(f).pill + "</span></li>")) : '<p class="muted">Noch niemandem gefolgt.</p>');
 
     html += app.card("Entfolgen? <span class=\"pill" + (unf.length ? " accent" : "") + "\">" + unf.length + "</span>",
       unf.length ? app.more(unf.map((f) => '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + '</b></a><span class="right muted">seit ' + app.fmtDate(f.ts) + "</span></li>"))
-        : '<p class="muted">Niemand – alle offenen Follows sind jünger als ' + CONFIG.unfollowAfterDays + " Tage.</p>", { tip: "Profile, denen du seit mindestens " + CONFIG.unfollowAfterDays + " Tagen folgst, ohne Follow-back." });
+        : '<p class="muted">Niemand – alle offenen Follows sind jünger als ' + ud + " Tage.</p>", { tip: "Profile, denen du seit mindestens " + ud + " Tagen folgst, ohne Follow-back." });
 
     if (s.newFollowers.length) {
       html += app.card("Neue Follower <span class=\"pill\">" + s.newFollowers.length + "</span>", app.more(s.newFollowers.slice(0, 40).map((f) => '<a class="chip" href="' + app.profile(f.h) + '" target="_blank" rel="noopener">@' + app.esc(f.h) + "</a>"), 12, "chips"));

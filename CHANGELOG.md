@@ -33,6 +33,12 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 
 ## Verlauf
 
+### 24.11.2026 – v1.12.1 (Follow-Status korrigiert, Make-Log für Follow-Kommentare)
+- App, Wachstum: Status-Pillen „offen · X T.“, „entfolgen fällig“, „entfolgt“, „folgt zurück“. Entfolgte Accounts (Make-Status `unf`) standen vorher als „X T. offen“ da (z. B. @hannah____berg).
+- App: Entfolgen-Grenze kommt aus den Skill-Einstellungen (`limits.unfollow_days`, aktuell 7) statt `CONFIG.unfollowAfterDays` (14, gelöscht). Neu im Kern: `App.followState()`, `App.unfDays()`.
+- Make „IG App API“, `log`: Follow-Zeilen (`F`) mit Kommentartext zählen jetzt als Like + Kommentar (vorher fehlten sie in Tages- und Stundenlimit). Follow-Einträge speichern Kommentar (`c`) und Shortcode (`sc`). Ältere Follows werden aus `activity` und dem Tageslog nachgetragen.
+- Make „IG App API“, `prep`: `day`/`hour` zählen Follow-Zeilen mit Kommentar mit. Folge: Die Limits greifen ab jetzt früher, weil sie korrekt zählen.
+
 ### 16.11.2026 – Arbeitsregeln
 - Neu: `CLAUDE.md` im Repo. Claude Code liest damit automatisch zuerst dieses Protokoll und hält sich an die Regeln (kein toter Code, Version hochzählen, Protokoll pflegen, Make-Credits, Browser nur über Windows).
 

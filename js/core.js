@@ -264,6 +264,15 @@
       cls = cls || "list"; n = n || 5; const t = /chips/.test(cls) ? "div" : "ul", box = (x) => "<" + t + ' class="' + cls + '">' + x.join("") + "</" + t + ">";
       return box(items.slice(0, n)) + (items.length > n ? '<details class="more"><summary>Alle anzeigen (' + items.length + ")</summary>" + box(items.slice(n)) + "</details>" : "");
     },
+    /* Follow-Status aus Make (open, no, back, unf) plus Alter; Grenze aus den Skill-Einstellungen */
+    unfDays() { const l = (this.data && this.data.cfg && this.data.cfg.limits) || {}; return Number(l.unfollow_days) || 7; },
+    followState(f) {
+      const age = Math.max(0, daysAgo(f.ts));
+      if (f.status === "back") return { key: "back", age, pill: '<span class="pill green">folgt zurück</span>' };
+      if (f.status === "unf") return { key: "unf", age, pill: '<span class="pill">entfolgt</span>' };
+      if (age >= this.unfDays()) return { key: "due", age, pill: '<span class="pill accent">entfolgen fällig</span>' };
+      return { key: "open", age, pill: '<span class="pill">offen · ' + age + " T.</span>" };
+    },
     profile(hh) { return "https://www.instagram.com/" + encodeURIComponent(hh) + "/"; },
     userLink(hh) { return '<a href="' + App.profile(hh) + '" target="_blank" rel="noopener"><b>@' + esc(hh) + "</b></a>"; },
 

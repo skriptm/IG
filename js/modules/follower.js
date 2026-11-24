@@ -1,12 +1,12 @@
-/* Skript: alles, was die Engagement-Sessions bewirken. Kacheln, Quellen-Auswertung, Gefolgt-Liste, Follower-Kurve,
+/* Follower: alles, was die Engagement-Sessions bewirken. Kacheln, Quellen-Auswertung, Gefolgt-Liste, Follower-Kurve,
    Aktivität pro Session, Conversions, neue Follower, letzte Kommentare */
 App.register({
-  id: "skript", title: "Skript", order: 2,
+  id: "follower", title: "Follower", order: 2,
   icon: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M19 8v6M16 11h6"/></svg>',
   filter: "all",
   render(el, d, app) {
     const s = d.stats;
-    if (!s) { el.innerHTML = app.card("Skript", '<p class="note">⚠️ ' + app.esc(d.statsError || "Noch keine Daten") + "</p>"); return; }
+    if (!s) { el.innerHTML = app.card("Follower", '<p class="note">⚠️ ' + app.esc(d.statsError || "Noch keine Daten") + "</p>"); return; }
     const me = this, lim = (d.cfg && d.cfg.limits) || {}, ud = app.unfDays();
     const rows = s.follows.map((f) => Object.assign({}, f, { st: app.followState(f), text: f.c || commentOf(s, f.h) }));
     const cnt = (k) => rows.filter((r) => r.st.key === k).length;
@@ -35,16 +35,19 @@ App.register({
     s.activity.forEach((a) => { if (a.act === "comment") get(a.via).forEach((x) => x.c++); });
     s.conversions.forEach((c) => get(c.via).forEach((x) => x.conv++));
     rows.forEach((r) => get(r.via).forEach((x) => { x.f++; if (r.st.key === "back") x.back++; }));
-    const G = Object.values(src).sort((a, b) => (b.c + b.f) - (a.c + a.f));
-    const srcRow = (x, big) => '<div class="src-row' + (big ? " grp" : "") + '"><div class="src-h"><span>' + app.esc(x.name) + "</span></div>" +
+    // Sortierung: wer am meisten Follower bringt (Conversions + Follow-backs) oben, bei Gleichstand die bessere Quote
+    const won = (x) => x.conv + x.back, rate = (x) => (x.c + x.f ? won(x) / (x.c + x.f) : 0);
+    const best = (a, b) => won(b) - won(a) || rate(b) - rate(a);
+    const G = Object.values(src).sort(best);
+    const srcRow = (x, big) => '<div class="src-row' + (big ? " grp" : "") + '"><div class="src-h"><span>' + app.esc(x.name) + '</span><span class="pill' + (won(x) ? " green" : "") + '">+' + won(x) + "</span></div>" +
       '<div class="src-m">' +
         (x.c ? '<span>💬 ' + x.c + " → <b>" + x.conv + "</b> Follower" + (x.c >= 30 ? " · " + app.d1(x.conv / x.c * 100) + "/100" : "") + "</span>" : "") +
         (x.f ? '<span>➕ ' + x.f + " → <b>" + x.back + "</b> zurück · " + app.pct(x.back / x.f, 0) + "</span>" : "") +
       "</div>" + (x.f ? '<div class="roi-bar"><i style="width:' + Math.round(x.back / x.f * 100) + '%"></i></div>' : "") + "</div>";
     if (G.length) html += app.card("Welche Quelle bringt was?",
-      '<div class="src">' + G.map((g) => srcRow(g, true) + Object.values(g.items).sort((a, b) => (b.c + b.f) - (a.c + a.f)).map((it) => srcRow(it)).join("")).join("") + "</div>" +
+      '<div class="src">' + G.map((g) => srcRow(g, true) + Object.values(g.items).sort(best).map((it) => srcRow(it)).join("")).join("") + "</div>" +
       app.note("💬 Kommentare → neue Follower daraus. ➕ Follows → davon zurückgefolgt (Balken). Unter 30 ist der Wert noch Zufall."),
-      { tip: "Pro Quelle zwei Wege zu Followern: Kommentieren (Conversion) und Folgen (Follow-back). Offene Follows zählen mit, die Quote steigt also noch." });
+      { tip: "Pro Quelle zwei Wege zu Followern: Kommentieren (Conversion) und Folgen (Follow-back). +Zahl = Follower insgesamt, danach ist sortiert. Offene Follows zählen mit, die Quote steigt also noch." });
 
     const F = [["all", "Alle", rows.length], ["open", "Offen", cnt("open")], ["due", "Fällig", due], ["back", "Zurück", back], ["unf", "Entfolgt", cnt("unf")]];
     html += app.card("Gefolgt",

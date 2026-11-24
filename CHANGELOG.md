@@ -2,7 +2,7 @@
 
 Zweck: Nach jeder Änderung an der App wird hier eingetragen, was gemacht wurde. Claude liest das vor jeder neuen Bearbeitung, damit nichts verloren geht.
 
-App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Skript, Content, Kontakte, Einstellungen.
+App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower, Content, Kontakte, Einstellungen.
 
 ## Bewusste Entscheidungen (nicht rückgängig machen)
 - Kein Knopf „Session starten“ in der App, bewusst entfernt. Sessions startet André im Claude-Chat.
@@ -32,6 +32,10 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Skript, C
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 24.11.2026 – v1.15.1 (Reiter „Follower“, Quellen nach Ertrag sortiert)
+- Reiter „Skript“ heißt „Follower“ (`follower.js`, ersetzt `skript.js`, Wunsch André).
+- „Welche Quelle bringt was?“: sortiert nach gewonnenen Followern (Conversions + Follow-backs), bei Gleichstand nach Quote. Gilt für Gruppen und einzelne Quellen, bei jedem Laden. Pille „+N“ zeigt die gewonnenen Follower je Quelle.
 
 ### 24.11.2026 – v1.15.0 (Wachstum aufgelöst, Reiter „Skript“)
 - Reiter „Wachstum“ entfernt (`growth.js` gelöscht), Inhalte verteilt, Doppeltes raus. 5 statt 6 Reiter.

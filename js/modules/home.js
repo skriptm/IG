@@ -1,4 +1,4 @@
-/* Übersicht: Heute, Woche, Zu tun, Session, Fokus, neuester Post */
+/* Übersicht: Heute, neuester Post, Woche, Netto-Follower, Follower-Ziel, Zu tun, Session, Fokus */
 
 /* Gemeinsame Kennzahlen (auch vom Content-Tab genutzt) */
 App.kpi = function (d) {
@@ -127,8 +127,33 @@ App.register({
       '<a class="post-hero" href="' + app.esc(p.link) + '" target="_blank" rel="noopener"><div class="post-meta"><span class="tag">' + p.format + "</span> " + app.fmtDate(p.ts, true) + "</div>" +
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
       '<div class="stats mini">' + app.stat("Reichw.", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Komm.", app.num(p.comments)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>") : "";
-    // Reihenfolge: Heute, neuester Post, Woche, dann Aufgaben, dann Technik
-    el.innerHTML = cToday + cPost + cWeek + cTodo + cFresh + cSession + cFocus;
+    // Netto-Follower pro Tag (direkt von Instagram)
+    const netDays = d.insights.filter((x) => x.follows != null || x.unfollows != null);
+    const net = netDays.reduce((a, x) => a + (x.follows || 0) - (x.unfollows || 0), 0);
+    const cNet = netDays.length ? app.card("Netto-Follower pro Tag <span class=\"pill " + (net >= 0 ? "green" : "red") + "\">" + app.signed(net) + "</span>", '<div class="chart-box" id="ch-net"></div>',
+      { tip: "Neue Follower minus Unfollows pro Tag, direkt von Instagram. Zählt alles, auch Follows über Reels, Stories und Werbung, nicht nur über das Skript." }) : "";
+
+    // Follower-Ziel mit Prognose
+    let cGoal = "";
+    const goal = cfg.goal || (s && s.goal) || {};
+    if (s && s.sessions.length && goal.followers) {
+      const first = s.sessions[0], lastS = s.sessions[s.sessions.length - 1], gain = lastS.followers - first.followers;
+      const spanDays = Math.max(1, (app.toDate(lastS.ts) - app.toDate(first.ts)) / 864e5);
+      const perDay = gain / spanDays, left = goal.followers - lastS.followers;
+      const eta = perDay > 0 ? Math.ceil(left / perDay) : null;
+      const etaDate = eta != null ? new Date(Date.now() + eta * 864e5) : null;
+      const onTrack = goal.date && etaDate ? etaDate <= new Date(goal.date) : null;
+      cGoal = app.card("Follower-Ziel",
+        '<div class="stats">' + app.stat("Ziel", app.num(goal.followers), goal.date ? "bis " + app.fmtDate(goal.date) : "") +
+        app.stat("Noch", app.num(Math.max(0, left)), app.d1(perDay) + " pro Tag") + "</div>" +
+        '<div style="margin-top:10px">' + Charts.meter(lastS.followers, goal.followers) + "</div>" +
+        app.note(left <= 0 ? "Ziel erreicht 🎉" : eta == null ? "Beim aktuellen Tempo nicht absehbar." : "Beim aktuellen Tempo erreicht am " + etaDate.toLocaleDateString("de-CH") + (onTrack == null ? "." : onTrack ? ", also rechtzeitig." : ", also später als geplant.")));
+    }
+
+    // Reihenfolge: Heute, neuester Post, Woche, Netto, Ziel, dann Aufgaben, dann Technik
+    el.innerHTML = cToday + cPost + cWeek + cNet + cGoal + cTodo + cFresh + cSession + cFocus;
+    const netBox = el.querySelector("#ch-net");
+    if (netBox) Charts.diverge(netBox, netDays.map((x) => ({ x: app.fmtDate(x.day), v: (x.follows || 0) - (x.unfollows || 0), tip: "<b>" + app.fmtDate(x.day) + "</b><br>+" + app.num(x.follows || 0) + " neu · −" + app.num(x.unfollows || 0) + " weg" })));
     el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));
 
     // Stunden-Countdown, läuft live mit

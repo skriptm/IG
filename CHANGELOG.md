@@ -2,7 +2,7 @@
 
 Zweck: Nach jeder Änderung an der App wird hier eingetragen, was gemacht wurde. Claude liest das vor jeder neuen Bearbeitung, damit nichts verloren geht.
 
-App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum, Follows, Content, Kontakte, Einstellungen.
+App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Skript, Content, Kontakte, Einstellungen.
 
 ## Bewusste Entscheidungen (nicht rückgängig machen)
 - Kein Knopf „Session starten“ in der App, bewusst entfernt. Sessions startet André im Claude-Chat.
@@ -32,6 +32,14 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 24.11.2026 – v1.15.0 (Wachstum aufgelöst, Reiter „Skript“)
+- Reiter „Wachstum“ entfernt (`growth.js` gelöscht), Inhalte verteilt, Doppeltes raus. 5 statt 6 Reiter.
+- Übersicht: neu „Netto-Follower pro Tag“ und „Follower-Ziel“ (unter „Diese Woche“).
+- Content: neu „Funnel“ (unter „Reichweite pro Tag“).
+- Reiter „Follows“ heißt jetzt „Skript“ (`skript.js`, ersetzt `follows.js`): Kacheln, „Welche Quelle bringt was?“, Gefolgt-Liste, Follower & Follows pro Tag, Aktivität pro Session, Conversions, neue Follower, letzte Kommentare.
+- „Bringt das Skript Follower?“ und „Was funktioniert?“ zu einer Karte „Welche Quelle bringt was?“ zusammengelegt: je Gruppe (Hashtags, Hubs, Feed, Gegenbesuch, Kernliste & Merkliste, Sonstige) und einzeln Kommentare → Follower und Follows → Follow-backs.
+- Gelöscht als doppelt: Kachel-Karte „Follower“ aus Wachstum (Kacheln jetzt nur im Skript-Reiter), zweite Follower-Kurve. CSS `.roi-s` gelöscht.
 
 ### 24.11.2026 – v1.14.2 (Übersicht: neuester Post oben, Wochentage im Streak)
 - Übersicht: Karte „Neuester Post“ direkt unter „Heute“ (vorher ganz unten).

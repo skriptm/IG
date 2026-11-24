@@ -266,10 +266,9 @@ input:focus, textarea:focus { outline: none; border-color: rgba(var(--accent-rgb
 .roi-row { padding: 10px 0; border-top: 1px solid var(--glass-b); } .roi-row:first-child { border-top: 0; }
 .roi-h { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .roi-bar { height: 6px; border-radius: 4px; background: rgba(255,255,255,.07); overflow: hidden; } .roi-bar i { display: block; height: 100%; border-radius: 4px; background: var(--accent); }
-.roi-s { margin-top: 6px; }
 .sub { margin: 16px 0 2px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
 
-/* Follows */
+/* Skript */
 .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
 .tiles .tile:first-child { grid-column: span 2; }
 @media (min-width: 600px) { .tiles { grid-template-columns: repeat(5, 1fr); } .tiles .tile:first-child { grid-column: auto; } }
@@ -287,3 +286,5 @@ input:focus, textarea:focus { outline: none; border-color: rgba(var(--accent-rgb
 .src-row.grp .src-h span:first-child { font-weight: 600; }
 .src-row:not(.grp) .roi-bar { height: 4px; } .src-row:not(.grp) .roi-bar i { background: var(--accent-l); opacity: .7; }
 .src-h { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; margin-bottom: 4px; }
+.src-m { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 5px; font-variant-numeric: tabular-nums; }
+.src-m b { color: var(--text); font-weight: 600; }

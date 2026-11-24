@@ -9,7 +9,7 @@ Diese Datei wird in Claude Code automatisch gelesen. Sie gilt für jede Bearbeit
 ## Aufbau
 - PWA ohne Build-Schritt, ausgeliefert über GitHub Pages (Push auf `main` = live).
 - `js/core.js`: Kern, Laden der Daten, Aufrufe an Make. `js/config.js`: Version, Webhook-Adressen, Altersgrenze fürs Nachladen.
-- `js/modules/*.js`: ein Reiter pro Datei (Übersicht, Wachstum, Follows, Content, Kontakte, Einstellungen).
+- `js/modules/*.js`: ein Reiter pro Datei (Übersicht, Skript, Content, Kontakte, Einstellungen).
 - `sw.js`: Service Worker. Bei jeder Änderung `VERSION` hochzählen und `CONFIG.version` passend setzen.
 
 ## Regeln (von André)

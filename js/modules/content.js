@@ -1,4 +1,4 @@
-/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite, Ranking, Formate, Captions, Reels, Monate, Konto-Insights, Zielgruppe */
+/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite, Funnel, Ranking, Formate, Captions, Reels, Monate, Konto-Insights, Zielgruppe */
 App.register({
   id: "content", title: "Content", order: 3,
   icon: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.6"/></svg>',
@@ -23,6 +23,7 @@ App.register({
         : '<p class="muted">Alles beantwortet 🙂</p>'), { id: "open", tip: "Claude antwortet unter deinen letzten 12 Posts, Fragen gehen per Mail an dich. Eigene Accounts und Spam sind ausgeblendet. Mit ↻ oben fragst du Instagram neu ab." });
 
     html += app.card("Reichweite pro Tag", '<div class="legend"><i style="background:var(--sand)"></i>Follower <i style="background:var(--accent)"></i>Nicht-Follower <i style="background:#5a5550"></i>Werbung</div><div class="chart-box" id="ch-reach"></div>');
+    html += funnelCard(d, app);
 
     const sorts = { signal: "Saves+Shares", reach: "Reichweite", er: "Engagement", ts: "Neueste" };
     html += app.card("Content-Ranking",
@@ -106,3 +107,16 @@ App.register({
     };
   }
 });
+
+/* Funnel: erreichte Nicht-Follower → Profilaufrufe → neue Follower (Konto-Insights der letzten 7 Tage) */
+function funnelCard(d, app) {
+  const W = App.week(d), c = W && W.cur;
+  if (!c || !c.pvDays) return "";
+  const r1 = c.pvReachNonOrg ? c.pv / c.pvReachNonOrg : null, r2 = c.pv ? c.pvFollows / c.pv : null;
+  const step = (label, v, sub) => '<div class="fn-step"><div class="fn-l">' + label + '</div><div class="fn-v">' + app.num(v) + "</div>" + (sub ? '<div class="fn-s">' + sub + "</div>" : "") + "</div>";
+  const arrow = (r) => '<div class="fn-arrow">↓ <b>' + (r == null ? "–" : app.pct(r)) + "</b></div>";
+  return app.card("Funnel <small>" + (c.pvDays === 1 ? app.fmtDate(c.pvFrom) : app.fmtDate(c.pvFrom) + "–" + app.fmtDate(c.to)) + "</small>",
+    '<div class="funnel">' + step("Erreicht, folgen dir nicht", c.pvReachNonOrg, "organisch") + arrow(r1) + step("Profilaufrufe", c.pv) + arrow(r2) + step("Neue Follower", c.pvFollows) + "</div>" +
+    (c.pvDays < 7 ? app.note("Profilaufrufe werden erst seit " + app.fmtDate(c.pvFrom) + " erfasst. Nach einer Woche ist der Funnel aussagekräftig.") : ""),
+    { tip: "Wie viele Nicht-Follower, die deinen Content gesehen haben, auf dein Profil gehen, und wie viele davon folgen. Ist die erste Quote niedrig, liegt es am Content. Ist die zweite niedrig, liegt es am Profil (Bio, Highlights, oberste Posts)." });
+}

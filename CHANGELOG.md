@@ -9,7 +9,7 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - Instagram-Daten werden nur auf Tippen auf ↻ neu abgefragt, nicht automatisch.
 - Entfernte Funktionen werden immer komplett aus dem Code gelöscht (kein toter Code).
 - Merkliste und Gegenbesuch-Warteschlange sind eine gemeinsame Liste „Als Nächstes besuchen“ im Reiter Kontakte.
-- Moody-Cinematic-Look (dunkel, Glas-Karten, Orange als Akzent).
+- Moody-Cinematic-Look (dunkel, Glas-Karten, Eisblau #4B88C5 als Akzent, seit v1.14.0; vorher Orange).
 - Make-Credits sparen: Start und Rückkehr in die App laden nur nach, wenn die Daten älter als 30 Minuten sind (CONFIG.maxAgeMin). ↻ und Ziehen laden immer. Die App lädt alles mit einem Aufruf (`init`).
 - Browser-Aufgaben (Tests, Instagram) laufen immer über den Windows-Rechner, nie über das MacBook.
 
@@ -32,6 +32,12 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 24.11.2026 – v1.14.0 (Eisblau statt Orange, Banner mit Bergen und Kamera)
+- Akzentfarbe Eisblau `#4B88C5` (hell `#9CC6EE`) statt Orange, nach Foto von André. Alle Orange-Töne laufen jetzt über `--accent-rgb`.
+- `--blue` gelöscht (hätte mit dem neuen Akzent kollidiert). Likes im Chart „Aktivität pro Session“ und der Ring „Gefolgt“ in der Übersicht nutzen jetzt `--sand`.
+- Banner: kühler Nachthimmel, drei Bergketten mit Schneespitzen, deutlich sichtbarer. Dahinter eine Kamera als feine Linie, der Mond ist das Objektiv. Vignette etwas schwächer.
+- Staubpartikel im Banner kühl statt warm.
 
 ### 24.11.2026 – v1.13.0 (Reiter „Follows“)
 - Neuer Reiter „Follows“ (`js/modules/follows.js`): Kacheln mit Hochzählen und Anheben beim Hover (Follower, Folge ich, Follows heute von `limits.follow_day`, Follow-backs mit Quote, Entfolgen fällig).

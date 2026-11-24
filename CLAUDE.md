@@ -15,7 +15,7 @@ Diese Datei wird in Claude Code automatisch gelesen. Sie gilt für jede Bearbeit
 ## Regeln (von André)
 - Entfernte Funktionen komplett löschen, auch Code, CSS und Texte. Kein toter Code.
 - Nach jeder Änderung einen Eintrag in `CHANGELOG.md` (neuer Abschnitt oben im Verlauf, mit Version). Danach auch das Google Doc „IG App – Änderungsprotokoll“ im Drive-Ordner „Instagram Growth“ aktualisieren (neu anlegen, altes in den Papierkorb), falls Drive verfügbar ist.
-- Look: Moody Cinematic (dunkel, Glas-Karten, Orange als Akzent). Texte auf Deutsch, kurz, keine Erklärblöcke.
+- Look: Moody Cinematic (dunkel, Glas-Karten, Eisblau #4B88C5 als Akzent, Banner mit Bergen und Kamera). Texte auf Deutsch, kurz, keine Erklärblöcke.
 - Kein Knopf „Session starten“ in der App. Instagram-Daten nur auf ↻ neu abfragen, nicht automatisch.
 - Browser (Tests, Instagram) immer über den Windows-Rechner, nicht über das MacBook.
 - Schritt für Schritt arbeiten und nach jedem Schritt anschauen lassen.

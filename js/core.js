@@ -288,7 +288,7 @@
       const x = cv.getContext("2d"); let W, H, P;
       const rs = () => { const r = devicePixelRatio || 1; W = cv.width = cv.clientWidth * r; H = cv.height = cv.clientHeight * r; P = Array.from({ length: 38 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: (Math.random() * 1.5 + .4) * r, v: (Math.random() * .25 + .05) * r, a: Math.random() * .5 + .15 })); };
       rs(); addEventListener("resize", rs);
-      const loop = () => { if (!document.hidden) { x.clearRect(0, 0, W, H); P.forEach((p) => { p.y -= p.v; p.x += Math.sin(p.y / 60) * .2; if (p.y < 0) { p.y = H; p.x = Math.random() * W; } x.beginPath(); x.arc(p.x, p.y, p.r, 0, 7); x.fillStyle = "rgba(255,190,140," + p.a + ")"; x.fill(); }); } requestAnimationFrame(loop); };
+      const loop = () => { if (!document.hidden) { x.clearRect(0, 0, W, H); P.forEach((p) => { p.y -= p.v; p.x += Math.sin(p.y / 60) * .2; if (p.y < 0) { p.y = H; p.x = Math.random() * W; } x.beginPath(); x.arc(p.x, p.y, p.r, 0, 7); x.fillStyle = "rgba(200,225,250," + p.a + ")"; x.fill(); }); } requestAnimationFrame(loop); };
       loop();
     },
 

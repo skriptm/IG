@@ -75,7 +75,7 @@ App.register({
       '<div class="rings">' +
         Charts.ring(usedC, dayCap, "Kommentare", "var(--accent)") +
         Charts.ring(usedL, null, "Likes", "var(--sand)") +
-        Charts.ring(usedF, followCap, "Gefolgt", "var(--blue)") +
+        Charts.ring(usedF, followCap, "Gefolgt", "var(--sand)") +
       "</div>" +
       '<div class="gain' + (newF ? " pos" : "") + '"><span class="g-ic">' + (newF ? "✦" : "·") + '</span><span><b class="cu" data-to="' + newF + '">0</b> neue Follower heute</span><small>Ergebnis</small></div>' +
       '<div class="streak"><span class="flame">' + (streak ? "🔥" : "🌫️") + '</span><div style="flex:1"><b>' + streak + "</b> " + (streak === 1 ? "Tag" : "Tage") + " Streak" +

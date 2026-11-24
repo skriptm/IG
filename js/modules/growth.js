@@ -22,7 +22,7 @@ App.register({
         app.stat("Conversions", app.num(conv), totalComments ? app.pct(conv / totalComments) + " der Kommentare" : "") +
       "</div>" + '<div class="chart-box" id="ch-followers"></div>');
 
-    html += app.card("Aktivität pro Session", '<div class="legend"><i style="background:var(--accent)"></i>Kommentare <i style="background:var(--blue)"></i>Likes <i style="background:var(--green)"></i>Neue Follower</div><div class="chart-box" id="ch-sessions"></div>');
+    html += app.card("Aktivität pro Session", '<div class="legend"><i style="background:var(--accent)"></i>Kommentare <i style="background:var(--sand)"></i>Likes <i style="background:var(--green)"></i>Neue Follower</div><div class="chart-box" id="ch-sessions"></div>');
 
     // Ziel-Prognose
     const goal = (d.cfg && d.cfg.goal) || s.goal || {};
@@ -71,7 +71,7 @@ App.register({
     drawNet(el, d, app);
 
     Charts.line(el.querySelector("#ch-followers"), s.sessions.map((x) => ({ x: app.fmtDate(x.ts), y: x.followers, tip: "<b>" + app.num(x.followers) + "</b> Follower<br>" + app.fmtDate(x.ts, true) })), { id: "fol" });
-    Charts.bars(el.querySelector("#ch-sessions"), s.sessions.map((x) => ({ x: app.fmtDate(x.ts), parts: [{ v: x.comments, c: "var(--accent)" }, { v: x.likes, c: "var(--blue)" }, { v: x.new, c: "var(--green)" }],
+    Charts.bars(el.querySelector("#ch-sessions"), s.sessions.map((x) => ({ x: app.fmtDate(x.ts), parts: [{ v: x.comments, c: "var(--accent)" }, { v: x.likes, c: "var(--sand)" }, { v: x.new, c: "var(--green)" }],
       tip: app.fmtDate(x.ts, true) + "<br>💬 " + x.comments + " · ♥ " + x.likes + " · ➕ " + x.new + (x.conv ? " · 🎯 " + x.conv : "") })));
 
   }

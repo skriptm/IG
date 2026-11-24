@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/app.css?v=16">
+<link rel="stylesheet" href="css/app.css?v=17">
 </head>
 <body>
 <div id="ptr" class="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -20,14 +20,24 @@
   <header class="hero" id="hero">
     <svg class="hero-mountains" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1714"/><stop offset=".7" stop-color="#2a1c12"/><stop offset="1" stop-color="#0b0c0e"/></linearGradient>
-        <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2a2c"/><stop offset="1" stop-color="#0b0c0e"/></linearGradient>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f141b"/><stop offset=".65" stop-color="#1a2532"/><stop offset="1" stop-color="#0b0c0e"/></linearGradient>
+        <linearGradient id="m0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a5868"/><stop offset="1" stop-color="#1e2630"/></linearGradient>
+        <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3540"/><stop offset="1" stop-color="#0b0c0e"/></linearGradient>
       </defs>
       <rect width="1200" height="300" fill="url(#sky)"/>
-      <circle cx="930" cy="110" r="70" fill="#f07c1e" opacity=".12"/>
-      <circle cx="930" cy="110" r="26" fill="#f07c1e" opacity=".22"/>
-      <path d="M0 210 L120 150 L210 185 L330 110 L430 170 L520 130 L640 190 L760 120 L860 160 L980 100 L1100 165 L1200 135 L1200 300 L0 300Z" fill="#1d1c1e" opacity=".92"/>
-      <path d="M330 110 L348 126 L332 122 L318 130Z M980 100 L1000 118 L982 114 L966 122Z" fill="#d9cfc4" opacity=".22"/>
+      <g transform="translate(-40 0)">
+      <g class="cam" fill="none" stroke="#bcd6ef" stroke-width="2.2" stroke-linejoin="round" opacity=".22">
+        <path d="M600 62 H672 L688 38 H752 L768 62 H840 Q856 62 856 78 V226 H584 V78 Q584 62 600 62Z"/>
+        <rect x="604" y="44" width="34" height="14" rx="4"/><rect x="606" y="80" width="38" height="22" rx="5"/>
+        <circle cx="720" cy="140" r="64"/><circle cx="720" cy="140" r="50" opacity=".7"/>
+      </g>
+      <circle cx="720" cy="140" r="44" fill="#9cc6ee" opacity=".1"/>
+      <circle cx="720" cy="140" r="22" fill="#d8eaff" opacity=".28"/>
+      </g>
+      <path d="M0 175 L90 130 L170 160 L260 95 L350 150 L450 105 L560 160 L660 120 L760 165 L880 90 L990 150 L1090 115 L1200 140 L1200 300 L0 300Z" fill="url(#m0)" opacity=".75"/>
+      <path d="M260 95 L284 118 L268 113 L252 122 L240 114Z M880 90 L906 116 L888 110 L872 120 L858 111Z M450 105 L468 122 L452 118 L438 124Z" fill="#e6f0fa" opacity=".55"/>
+      <path d="M0 215 L120 158 L210 190 L330 118 L430 175 L520 138 L640 195 L760 128 L860 168 L980 108 L1100 170 L1200 140 L1200 300 L0 300Z" fill="#232b34"/>
+      <path d="M330 118 L350 136 L334 131 L318 140Z M760 128 L780 146 L764 141 L748 150Z M980 108 L1000 126 L982 122 L966 130Z" fill="#dfeaf5" opacity=".4"/>
       <path d="M0 250 L90 205 L200 235 L300 190 L420 240 L540 200 L660 245 L790 205 L900 240 L1010 210 L1120 245 L1200 220 L1200 300 L0 300Z" fill="url(#m1)"/>
     </svg>
     <canvas id="dust" class="dust" aria-hidden="true"></canvas>
@@ -58,15 +68,15 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="js/config.js?v=16"></script>
-<script src="js/core.js?v=16"></script>
-<script src="js/charts.js?v=16"></script>
-<script src="js/modules/home.js?v=16"></script>
-<script src="js/modules/growth.js?v=16"></script>
-<script src="js/modules/follows.js?v=16"></script>
-<script src="js/modules/content.js?v=16"></script>
-<script src="js/modules/contacts.js?v=16"></script>
-<script src="js/modules/settings.js?v=16"></script>
+<script src="js/config.js?v=17"></script>
+<script src="js/core.js?v=17"></script>
+<script src="js/charts.js?v=17"></script>
+<script src="js/modules/home.js?v=17"></script>
+<script src="js/modules/growth.js?v=17"></script>
+<script src="js/modules/follows.js?v=17"></script>
+<script src="js/modules/content.js?v=17"></script>
+<script src="js/modules/contacts.js?v=17"></script>
+<script src="js/modules/settings.js?v=17"></script>
 <script>App.start();</script>
 </body>
 </html>

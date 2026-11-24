@@ -33,6 +33,9 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 
 ## Verlauf
 
+### 24.11.2026 – v1.14.1 (App-Icon in Eisblau)
+- App-Icons (180, 192, 512, 512 maskable) neu: Nachthimmel, Berge mit Schneespitzen, eisblauer Mond statt oranger Sonne. Mond und Gipfel liegen in der sicheren Zone für runde Icons.
+
 ### 24.11.2026 – v1.14.0 (Eisblau statt Orange, Banner mit Bergen und Kamera)
 - Akzentfarbe Eisblau `#4B88C5` (hell `#9CC6EE`) statt Orange, nach Foto von André. Alle Orange-Töne laufen jetzt über `--accent-rgb`.
 - `--blue` gelöscht (hätte mit dem neuen Akzent kollidiert). Likes im Chart „Aktivität pro Session“ und der Ring „Gefolgt“ in der Übersicht nutzen jetzt `--sand`.

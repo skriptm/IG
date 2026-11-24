@@ -42,7 +42,7 @@ App.register({
     const commentDays = new Set(s ? s.activity.filter((a) => a.act === "comment").map((a) => String(a.ts).slice(0, 10)) : []);
     let streak = 0; const dt = new Date(); if (!commentDays.has(app.localDay(dt))) dt.setDate(dt.getDate() - 1);
     while (commentDays.has(app.localDay(dt))) { streak++; dt.setDate(dt.getDate() - 1); }
-    const week = []; for (let i = 6; i >= 0; i--) { const x = new Date(); x.setDate(x.getDate() - i); week.push(commentDays.has(app.localDay(x))); }
+    const week = []; for (let i = 6; i >= 0; i--) { const x = new Date(); x.setDate(x.getDate() - i); week.push({ on: commentDays.has(app.localDay(x)), wd: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][x.getDay()], today: !i }); }
 
     const gbOpen = d.contacts.filter((c) => !c.marked).length, gbQ = d.contacts.filter((c) => c.marked).length;
     const k = App.kpi(d);
@@ -79,8 +79,8 @@ App.register({
       "</div>" +
       '<div class="gain' + (newF ? " pos" : "") + '"><span class="g-ic">' + (newF ? "✦" : "·") + '</span><span><b class="cu" data-to="' + newF + '">0</b> neue Follower heute</span><small>Ergebnis</small></div>' +
       '<div class="streak"><span class="flame">' + (streak ? "🔥" : "🌫️") + '</span><div style="flex:1"><b>' + streak + "</b> " + (streak === 1 ? "Tag" : "Tage") + " Streak" +
-      "<small>aktiv an " + week.filter(Boolean).length + " von 7 Tagen</small>" +
-      '<div class="days">' + week.map((on, i) => "<i" + (on ? ' class="on"' : "") + ' style="--i:' + i + '"></i>').join("") + "</div></div></div>" +
+      "<small>aktiv an " + week.filter((w) => w.on).length + " von 7 Tagen</small>" +
+      '<div class="days">' + week.map((w, i) => '<span' + (w.today ? ' class="now"' : "") + "><i" + (w.on ? ' class="on"' : "") + ' style="--i:' + i + '"></i><em>' + w.wd + "</em></span>").join("") + "</div></div></div>" +
       (d.statsError ? '<p class="note">⚠️ ' + app.esc(d.statsError) + "</p>" : ""));
 
     // Zu tun
@@ -127,8 +127,8 @@ App.register({
       '<a class="post-hero" href="' + app.esc(p.link) + '" target="_blank" rel="noopener"><div class="post-meta"><span class="tag">' + p.format + "</span> " + app.fmtDate(p.ts, true) + "</div>" +
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
       '<div class="stats mini">' + app.stat("Reichw.", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Komm.", app.num(p.comments)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>") : "";
-    // Reihenfolge: erst Ergebnis (Heute, Woche), dann Aufgaben, dann Technik
-    el.innerHTML = cToday + cWeek + cTodo + cFresh + cSession + cFocus + cPost;
+    // Reihenfolge: Heute, neuester Post, Woche, dann Aufgaben, dann Technik
+    el.innerHTML = cToday + cPost + cWeek + cTodo + cFresh + cSession + cFocus;
     el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));
 
     // Stunden-Countdown, läuft live mit

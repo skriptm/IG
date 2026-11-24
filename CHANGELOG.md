@@ -33,6 +33,10 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 
 ## Verlauf
 
+### 24.11.2026 – v1.14.2 (Übersicht: neuester Post oben, Wochentage im Streak)
+- Übersicht: Karte „Neuester Post“ direkt unter „Heute“ (vorher ganz unten).
+- Streak-Balken mit Wochentag darunter, heute hervorgehoben. Ein grauer Balken heißt: an dem Tag keine Session (z. B. Fr 21.11.).
+
 ### 24.11.2026 – v1.14.1 (App-Icon in Eisblau)
 - App-Icons (180, 192, 512, 512 maskable) neu: Nachthimmel, Berge mit Schneespitzen, eisblauer Mond statt oranger Sonne. Mond und Gipfel liegen in der sicheren Zone für runde Icons.
 

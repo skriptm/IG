@@ -2,7 +2,7 @@
 
 Zweck: Nach jeder Änderung an der App wird hier eingetragen, was gemacht wurde. Claude liest das vor jeder neuen Bearbeitung, damit nichts verloren geht.
 
-App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum, Content, Kontakte, Einstellungen.
+App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum, Follows, Content, Kontakte, Einstellungen.
 
 ## Bewusste Entscheidungen (nicht rückgängig machen)
 - Kein Knopf „Session starten“ in der App, bewusst entfernt. Sessions startet André im Claude-Chat.
@@ -32,6 +32,14 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Wachstum,
 - IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 24.11.2026 – v1.13.0 (Reiter „Follows“)
+- Neuer Reiter „Follows“ (`js/modules/follows.js`): Kacheln mit Hochzählen und Anheben beim Hover (Follower, Folge ich, Follows heute von `limits.follow_day`, Follow-backs mit Quote, Entfolgen fällig).
+- Liste „Gefolgt“ mit Filter (Alle, Offen, Fällig, Zurück, Entfolgt): Handle, Followerzahl, Quelle, Datum, Tage, unser Kommentar (Link zum Post), Status-Pille. Zeilen blenden gestaffelt ein.
+- „Was funktioniert?“: Follow-back-Quote je Quelle (Hashtags, Hubs, Feed, Sonstige) und jede Quelle einzeln.
+- Chart: Follower-Kurve und Follows pro Tag (davon zurück).
+- Wachstum: Karten „Gefolgt“, „Entfolgen?“ und Kachel „Follow-back“ entfernt (jetzt im Reiter Follows).
+- Kommentar je Follow kommt aus dem neuen Make-Feld `c`; ältere Follows ohne `c` nehmen den letzten Kommentar aus `activity`.
 
 ### 24.11.2026 – v1.12.1 (Follow-Status korrigiert, Make-Log für Follow-Kommentare)
 - App, Wachstum: Status-Pillen „offen · X T.“, „entfolgen fällig“, „entfolgt“, „folgt zurück“. Entfolgte Accounts (Make-Status `unf`) standen vorher als „X T. offen“ da (z. B. @hannah____berg).

@@ -1,4 +1,4 @@
-/* Wachstum: Netto-Follower pro Tag, Funnel, Follower-Kurve, Conversions, Follows mit Follow-back, Entfolgen-Kandidaten, Aktivität */
+/* Wachstum: Netto-Follower pro Tag, Funnel, Follower-Kurve, Conversions, Aktivität (Follows: eigener Reiter) */
 App.register({
   id: "growth", title: "Wachstum", order: 2,
   icon: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>',
@@ -13,9 +13,6 @@ App.register({
     const gain = lastS && first ? lastS.followers - first.followers : 0;
     const totalComments = s.sessions.reduce((a, x) => a + (x.comments || 0), 0);
     const conv = s.conversions.length;
-    const back = s.follows.filter((f) => f.status === "back").length;
-    const ud = app.unfDays();
-    const unf = s.follows.filter((f) => app.followState(f).key === "due");
 
     let html = netCards(d, app);
     html += app.card("Follower",
@@ -23,7 +20,6 @@ App.register({
         app.stat("Follower", app.num(lastS.followers), (gain >= 0 ? "+" : "") + app.num(gain) + " seit " + app.fmtDate(first.ts)) +
         app.stat("Folge ich", app.num(lastS.following)) +
         app.stat("Conversions", app.num(conv), totalComments ? app.pct(conv / totalComments) + " der Kommentare" : "") +
-        app.stat("Follow-back", s.follows.length ? back + "/" + s.follows.length : "–", s.follows.length ? app.pct(back / s.follows.length, 0) : "") +
       "</div>" + '<div class="chart-box" id="ch-followers"></div>');
 
     html += app.card("Aktivität pro Session", '<div class="legend"><i style="background:var(--accent)"></i>Kommentare <i style="background:var(--blue)"></i>Likes <i style="background:var(--green)"></i>Neue Follower</div><div class="chart-box" id="ch-sessions"></div>');
@@ -61,15 +57,6 @@ App.register({
       html += app.card("Conversions <span class=\"pill\">" + conv + "</span>", app.more(s.conversions.map((c) =>
         '<li><a href="' + app.profile(c.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(c.h) + '</b></a><span class="muted">über ' + app.esc(c.via || c.block || "–") + "</span><span class=\"right muted\">" + app.fmtDate(c.ts) + "</span></li>")));
     }
-
-    html += app.card("Gefolgt <span class=\"pill\">" + s.follows.length + "</span>", s.follows.length ? app.more(s.follows.map((f) =>
-      '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + "</b></a>" +
-      '<span class="muted">' + (f.f ? app.num(f.f) + " Follower · " : "") + app.esc(f.via || "") + "</span>" +
-      '<span class="right">' + app.followState(f).pill + "</span></li>")) : '<p class="muted">Noch niemandem gefolgt.</p>');
-
-    html += app.card("Entfolgen? <span class=\"pill" + (unf.length ? " accent" : "") + "\">" + unf.length + "</span>",
-      unf.length ? app.more(unf.map((f) => '<li><a href="' + app.profile(f.h) + '" target="_blank" rel="noopener"><b>@' + app.esc(f.h) + '</b></a><span class="right muted">seit ' + app.fmtDate(f.ts) + "</span></li>"))
-        : '<p class="muted">Niemand – alle offenen Follows sind jünger als ' + ud + " Tage.</p>", { tip: "Profile, denen du seit mindestens " + ud + " Tagen folgst, ohne Follow-back." });
 
     if (s.newFollowers.length) {
       html += app.card("Neue Follower <span class=\"pill\">" + s.newFollowers.length + "</span>", app.more(s.newFollowers.slice(0, 40).map((f) => '<a class="chip" href="' + app.profile(f.h) + '" target="_blank" rel="noopener">@' + app.esc(f.h) + "</a>"), 12, "chips"));

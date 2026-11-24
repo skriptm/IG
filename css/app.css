@@ -267,3 +267,22 @@ input:focus, textarea:focus { outline: none; border-color: rgba(240,124,30,.7); 
 .roi-bar { height: 6px; border-radius: 4px; background: rgba(255,255,255,.07); overflow: hidden; } .roi-bar i { display: block; height: 100%; border-radius: 4px; background: var(--accent); }
 .roi-s { margin-top: 6px; }
 .sub { margin: 16px 0 2px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+/* Follows */
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.tiles .tile:first-child { grid-column: span 2; }
+@media (min-width: 600px) { .tiles { grid-template-columns: repeat(5, 1fr); } .tiles .tile:first-child { grid-column: auto; } }
+.tile { background: rgba(255,255,255,.045); border: 1px solid var(--glass-b); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: var(--r); transition: transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s; }
+.tile:hover { transform: translateY(-3px); border-color: rgba(240,124,30,.35); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.tile .stat-v small { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--muted); }
+.tile.good .stat-v { color: var(--green); } .tile.hot .stat-v { color: var(--accent-l); }
+.seg button i { font-style: normal; opacity: .6; font-weight: 500; }
+.flist li { display: block; animation: rowin .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes rowin { from { opacity: 0; transform: translateX(-8px); } }
+.fl-top { display: flex; align-items: center; gap: 8px; } .fl-top .right { margin-left: auto; }
+.fl-meta { margin-top: 2px; }
+.ctext a { color: inherit; border-bottom: 1px dotted rgba(255,255,255,.25); }
+.src-row { margin-bottom: 10px; } .src-row.grp { margin-top: 6px; } .src-row:not(.grp) { padding-left: 12px; }
+.src-row.grp .src-h span:first-child { font-weight: 600; }
+.src-row:not(.grp) .roi-bar { height: 4px; } .src-row:not(.grp) .roi-bar i { background: var(--accent-l); opacity: .7; }
+.src-h { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; margin-bottom: 4px; }

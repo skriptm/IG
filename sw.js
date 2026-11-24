@@ -1,7 +1,7 @@
 /* Service Worker: App offline verfügbar machen. Bei jeder Änderung VERSION hochzählen. */
-const VERSION = "ig-1.12.1";
+const VERSION = "ig-1.13.0";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "css/app.css", "js/config.js", "js/core.js", "js/charts.js",
-  "js/modules/home.js", "js/modules/growth.js", "js/modules/content.js", "js/modules/contacts.js", "js/modules/settings.js",
+  "js/modules/home.js", "js/modules/growth.js", "js/modules/follows.js", "js/modules/content.js", "js/modules/contacts.js", "js/modules/settings.js",
   "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting())); });

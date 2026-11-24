@@ -271,7 +271,7 @@
       if (f.status === "back") return { key: "back", age, pill: '<span class="pill green">folgt zurück</span>' };
       if (f.status === "unf") return { key: "unf", age, pill: '<span class="pill">entfolgt</span>' };
       if (age >= this.unfDays()) return { key: "due", age, pill: '<span class="pill accent">entfolgen fällig</span>' };
-      return { key: "open", age, pill: '<span class="pill">offen · ' + age + " T.</span>" };
+      return { key: "open", age, pill: '<span class="pill">offen</span>' };
     },
     profile(hh) { return "https://www.instagram.com/" + encodeURIComponent(hh) + "/"; },
     userLink(hh) { return '<a href="' + App.profile(hh) + '" target="_blank" rel="noopener"><b>@' + esc(hh) + "</b></a>"; },

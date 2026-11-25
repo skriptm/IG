@@ -33,6 +33,13 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – v1.15.2 (Hubs und Hashtags klickbar)
+- Neuer Helfer `App.viaLink` (core.js): `@hub` öffnet das Instagram-Profil, `#tag` die Hashtag-Seite (Instagram leitet auf die Suche um, Top-Posts), alles andere bleibt Text. Namen werden auf erlaubte Zeichen geprüft. Links öffnen im neuen Tab (`noopener noreferrer`).
+- Reiter Follower: Hubs und Hashtags in „Welche Quelle bringt was?“ (Gruppen bleiben Text), in der Gefolgt-Liste, bei Conversions und bei „Letzte Kommentare“ klickbar.
+- Reiter Einstellungen: Chips für No-Go, Kernliste, Hubs und Hashtags verlinken auf Profil bzw. Hashtag-Seite (× zum Entfernen bleibt).
+- Alle @Handles in Listen waren schon Links. Neu: Links sind mit gepunkteter Linie markiert (`a.lnk`).
+- Keine neuen Make-Aufrufe.
+
 ### 24.11.2026 – v1.15.1 (Reiter „Follower“, Quellen nach Ertrag sortiert)
 - Reiter „Skript“ heißt „Follower“ (`follower.js`, ersetzt `skript.js`, Wunsch André).
 - „Welche Quelle bringt was?“: sortiert nach gewonnenen Followern (Conversions + Follow-backs), bei Gleichstand nach Quote. Gilt für Gruppen und einzelne Quellen, bei jedem Laden. Pille „+N“ zeigt die gewonnenen Follower je Quelle.

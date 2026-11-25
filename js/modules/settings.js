@@ -43,7 +43,7 @@ App.register({
       me.bar(el, app); return;
     }
 
-    const chips = (key, prefix, cls) => '<div class="chips" data-list="' + key + '">' + (c[key].length ? c[key].map((v, i) => '<span class="chip ' + (cls || "") + '">' + app.esc(prefix + v) + '<button data-del="' + key + '" data-i="' + i + '" aria-label="entfernen">×</button></span>').join("") : '<span class="muted small">Noch leer.</span>') + "</div>";
+    const chips = (key, prefix, cls) => '<div class="chips" data-list="' + key + '">' + (c[key].length ? c[key].map((v, i) => '<span class="chip ' + (cls || "") + '">' + (prefix ? app.viaLink(prefix + v) : app.esc(v)) + '<button data-del="' + key + '" data-i="' + i + '" aria-label="entfernen">×</button></span>').join("") : '<span class="muted small">Noch leer.</span>') + "</div>";
     const adder = (key, ph) => '<div class="add"><input data-add="' + key + '" placeholder="' + ph + '" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn small" data-addbtn="' + key + '">+ Hinzufügen</button></div><div class="err" data-err="' + key + '"></div>';
     const sw = (key, on, bad) => '<label class="switch' + (bad ? " bad" : "") + '"><input type="checkbox" data-sw="' + key + '"' + (on ? " checked" : "") + "><span></span></label>";
     const numf = (path, label, v) => '<label class="field"><span>' + label + '</span><input type="number" inputmode="numeric" min="0" data-num="' + path + '" value="' + v + '"></label>';

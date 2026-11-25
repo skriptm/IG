@@ -39,7 +39,7 @@ App.register({
     const won = (x) => x.conv + x.back, rate = (x) => (x.c + x.f ? won(x) / (x.c + x.f) : 0);
     const best = (a, b) => won(b) - won(a) || rate(b) - rate(a);
     const G = Object.values(src).sort(best);
-    const srcRow = (x, big) => '<div class="src-row' + (big ? " grp" : "") + '"><div class="src-h"><span>' + app.esc(x.name) + '</span><span class="pill' + (won(x) ? " green" : "") + '">+' + won(x) + "</span></div>" +
+    const srcRow = (x, big) => '<div class="src-row' + (big ? " grp" : "") + '"><div class="src-h"><span>' + (big ? app.esc(x.name) : app.viaLink(x.name)) + '</span><span class="pill' + (won(x) ? " green" : "") + '">+' + won(x) + "</span></div>" +
       '<div class="src-m">' +
         (x.c ? '<span>💬 ' + x.c + " → <b>" + x.conv + "</b> Follower" + (x.c >= 30 ? " · " + app.d1(x.conv / x.c * 100) + "/100" : "") + "</span>" : "") +
         (x.f ? '<span>➕ ' + x.f + " → <b>" + x.back + "</b> zurück · " + app.pct(x.back / x.f, 0) + "</span>" : "") +
@@ -60,14 +60,14 @@ App.register({
     html += app.card("Aktivität pro Session", '<div class="legend"><i style="background:var(--accent)"></i>Kommentare <i style="background:var(--sand)"></i>Likes <i style="background:var(--green)"></i>Neue Follower</div><div class="chart-box" id="ch-sessions"></div>');
 
     if (s.conversions.length) html += app.card("Conversions <span class=\"pill\">" + s.conversions.length + "</span>", app.more(s.conversions.map((c) =>
-      "<li>" + app.userLink(c.h) + '<span class="muted">über ' + app.esc(c.via || c.block || "–") + '</span><span class="right muted">' + app.fmtDate(c.ts) + "</span></li>")),
+      "<li>" + app.userLink(c.h) + '<span class="muted">über ' + app.viaLink(c.via || c.block || "–") + '</span><span class="right muted">' + app.fmtDate(c.ts) + "</span></li>")),
       { tip: "Neue Follower, mit denen das Skript in den 14 Tagen davor Kontakt hatte." });
 
     if (s.newFollowers.length) html += app.card("Neue Follower <span class=\"pill\">" + s.newFollowers.length + "</span>", app.more(s.newFollowers.slice(0, 40).map((f) => '<a class="chip" href="' + app.profile(f.h) + '" target="_blank" rel="noopener">@' + app.esc(f.h) + "</a>"), 12, "chips"));
 
     const acts = s.activity.filter((a) => a.act === "comment" && a.text).slice(0, 25);
     if (acts.length) html += app.card("Letzte Kommentare von dir", app.more(acts.map((a) =>
-      '<li><div><a href="https://www.instagram.com/p/' + encodeURIComponent(a.sc || "") + '/" target="_blank" rel="noopener"><b>@' + app.esc(a.h) + '</b></a> <span class="muted small">' + app.esc(a.via || a.block || "") + " · " + app.fmtDate(a.ts, true) + '</span></div><div class="ctext">' + app.esc(a.text) + "</div></li>"), 5, "list comments"));
+      '<li><div><a href="https://www.instagram.com/p/' + encodeURIComponent(a.sc || "") + '/" target="_blank" rel="noopener"><b>@' + app.esc(a.h) + '</b></a> <span class="muted small">' + app.viaLink(a.via || a.block || "") + " · " + app.fmtDate(a.ts, true) + '</span></div><div class="ctext">' + app.esc(a.text) + "</div></li>"), 5, "list comments"));
     el.innerHTML = html;
 
     const list = el.querySelector("#fl-list");
@@ -75,7 +75,7 @@ App.register({
       const show = rows.filter((r) => me.filter === "all" || r.st.key === me.filter);
       list.innerHTML = show.length ? show.map((r, i) =>
         '<li style="--i:' + Math.min(i, 12) + '"><div class="fl-top">' + app.userLink(r.h) + (r.f ? '<span class="muted small">' + app.num(r.f) + "</span>" : "") + '<span class="right">' + r.st.pill + "</span></div>" +
-        '<div class="fl-meta muted small">' + app.esc(r.via || "–") + " · " + app.fmtDate(r.ts) + " · " + r.st.age + " T.</div>" +
+        '<div class="fl-meta muted small">' + (r.via ? app.viaLink(r.via) : "–") + " · " + app.fmtDate(r.ts) + " · " + r.st.age + " T.</div>" +
         (r.text ? '<div class="ctext">' + (r.sc ? '<a href="https://www.instagram.com/p/' + encodeURIComponent(r.sc) + '/" target="_blank" rel="noopener">' + app.esc(r.text) + "</a>" : app.esc(r.text)) + "</div>" : "") + "</li>").join("")
         : '<li class="muted">Keine Einträge.</li>';
     };

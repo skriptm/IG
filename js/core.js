@@ -275,6 +275,14 @@
     },
     profile(hh) { return "https://www.instagram.com/" + encodeURIComponent(hh) + "/"; },
     userLink(hh) { return '<a href="' + App.profile(hh) + '" target="_blank" rel="noopener"><b>@' + esc(hh) + "</b></a>"; },
+    tag(t) { return "https://www.instagram.com/explore/tags/" + encodeURIComponent(t) + "/"; },
+    // Quelle als Link: @hub öffnet das Profil, #tag die Hashtag-Suche, alles andere bleibt Text. Namen werden geprüft.
+    viaLink(via) {
+      const v = String(via == null ? "" : via), n = v.slice(1);
+      if (v[0] === "@" && /^[A-Za-z0-9._]{1,30}$/.test(n)) return '<a class="lnk" href="' + App.profile(n) + '" target="_blank" rel="noopener noreferrer">' + esc(v) + "</a>";
+      if (v[0] === "#" && /^[\p{L}\p{N}_]{1,100}$/u.test(n)) return '<a class="lnk" href="' + App.tag(n) + '" target="_blank" rel="noopener noreferrer">' + esc(v) + "</a>";
+      return esc(v);
+    },
 
     pullToRefresh() {
       let y0 = null, dy = 0; const ind = document.getElementById("ptr");

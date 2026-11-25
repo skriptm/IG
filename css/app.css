@@ -13,6 +13,8 @@ body { min-height: 100vh; overscroll-behavior-y: contain; }
 body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background: radial-gradient(ellipse at 50% 0%, rgba(var(--accent-rgb),.08), transparent 55%), radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.65) 100%); }
 a { color: inherit; text-decoration: none; }
+a.lnk { border-bottom: 1px dotted rgba(255,255,255,.3); }
+a.lnk:active { color: var(--accent-l); }
 button { font: inherit; color: inherit; }
 
 /* Kopf */

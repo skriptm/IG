@@ -9,10 +9,10 @@ Zuerst `CHANGELOG.md` lesen (Verlauf, bewusste Entscheidungen). Diese Datei list
 - **Auto-Reply neu:** `automation/ig-autoreply.gs` als Google-Apps-Script-Projekt „IG Auto-Reply“ (script.google.com), Modus `draft`, Zeitplan alle 5 Minuten. Protokoll: Google Sheet „IG Auto-Reply Protokoll“. Meta-App „lauinger-hub“ (Systemnutzer-Token, läuft nicht ab), Claude-Schlüssel „ig-autoreply“ mit 5-$-Monatslimit.
 
 ## Offen, in dieser Reihenfolge
-1. **Auto-Reply Parallellauf (bis ca. 2.12.):** Entwürfe im Sheet mit den Make-Antworten vergleichen. Dann:
+1. **Auto-Reply Parallellauf (bis 28.11.):** Entwürfe im Sheet mit den Make-Antworten vergleichen. Dann:
    - Gegenbesuch-Eintrag neuer Kommentierer ins Apps Script einbauen (macht bisher Make: Data Store 209450, Felder h, ts, src=comment, text, media). Weg: Apps Script ruft die IG App API mit `a=mark` auf, oder neue Route.
    - `MODE` auf `live`, Make-Szenario 2841603 deaktivieren (nicht löschen).
-2. **Make-Credits:** Reset-Datum klären (André prüft im Make-Dashboard, 01.12. oder 12.12.). Bei 12.12. reicht die Einsparung nicht ganz: Posts-Abruf 06:10 von 8 auf 5 Posts senken.
+2. **Make-Credits:** Reset am 12.12. Posts-Abruf 06:10 seit 25.11. auf 5 Posts. Rest kommt mit Schritt 1 (Make-Auto-Reply aus am 28.11.). André nutzt ↻ in der App sparsam.
 3. **Zugangscode erneuern:** Er steht im Klartext im Skill (Abschnitt 1) und im geplanten Auftrag „IG Wochen-Check Tokens“. Neuen Code in allen Router-Filtern der IG App API und im Init-Szenario setzen, Skill und Wochen-Check anpassen, André trägt ihn in der App neu ein.
 4. **Design-Umbau** (freigegeben, Vorschau abgenommen): Schrift Urbanist (offline ins Repo, OFL), massive dunkle Karten mit großem Radius, „Heute“ als gefüllte Eisblau-Karte (#9CC6EE, dunkle Schrift) mit Reiter-Ecke, weiße Pillen, große leichte Zahlen, untere Leiste nur Icons (aktiv = weißer Kreis), Banner schlanker. Dazu Sidebar am Desktop und Animationen in allen Reitern.
 5. **Caption-Generator** (Text und Foto) über Google Apps Script, gleiche Schlüssel-Lösung wie der Auto-Reply. Plus Hashtag-Sets aus den eigenen Reichweiten-Daten in der App.

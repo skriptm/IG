@@ -27,11 +27,16 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 - IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get, prep, log. `all`, `stats`, `cfg_get`, `sess_get` nutzt die App seit v1.12.0 nicht mehr.
 - IG App Init (10171545): eigener Webhook (Hook 4517389), liefert Posts, Insights, Gegenbesuch, Statistik, Einstellungen und Session in einem Aufruf. 14 Operationen statt 20.
 - IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
-- IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, Data Store 208242.
+- IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, die 5 neuesten Posts, Data Store 208242.
 - IG Hub-Alarm (10170662): täglich 18:45, Datensatz `fresh` im Data Store 208242.
 - IG Auto-Reply (2841603, ohne Mails seit 25.11.), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 25.11.2026 – Make-Credits sparen (App unverändert, v1.17.0)
+- Credit-Reset ist am 12.12. (nicht 01.12.). Stand 25.11.: 5.438 Credits übrig, Ziel ≤ 320 pro Tag.
+- Posts & Kommentare (10139638, 06:10): holt nur noch die 5 neuesten Posts statt 8 (spart ca. 20 Credits pro Tag).
+- Auto-Reply: Parallellauf verkürzt, am 28.11. Apps Script auf `live` und Make-Szenario 2841603 deaktivieren (spart ca. 115 Credits pro Tag).
 
 ### 25.11.2026 – Auto-Reply als Google Apps Script (Parallellauf, App unverändert)
 - Neu: `automation/ig-autoreply.gs`, läuft auf script.google.com alle 5 Minuten, ohne Make-Credits. Prüft die 8 neuesten Posts (nur bei geänderter Kommentarzahl), beantwortet Kommentare tagsüber 07:30–21:30 mit demselben Prompt wie Make (Claude Sonnet 5.5, Effort low), frühestens 4 Minuten nach dem Kommentar, höchstens 24 Stunden alt. Fragen, Spam, Nacht, unsichere Antworten bleiben offen (App → Unbeantwortet).

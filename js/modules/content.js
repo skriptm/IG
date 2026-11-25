@@ -1,4 +1,4 @@
-/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite pro Tag, Funnel, Ranking, Was funktioniert (Formate, Captions, Reels), Zielgruppe */
+/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite pro Tag, Funnel, Ranking, Was funktioniert (Formate, Captions, Reels), Hub-Features, Zielgruppe */
 App.register({
   id: "content", title: "Content", order: 3,
   icon: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.6"/></svg>',
@@ -40,6 +40,7 @@ App.register({
       reels.map((p) => '<tr><td><a href="' + app.esc(p.link) + '" target="_blank" rel="noopener">' + app.fmtDate(p.ts) + "</a></td><td><b>" + app.d1(p.watchAvg) + " s</b></td><td>" + app.num(p.views) + "</td><td>" + app.num(p.reach) + "</td></tr>").join("") + "</tbody></table></div>" : "";
     html += app.card("Was funktioniert", tbl(group("format"), "Format") + '<div style="margin-top:12px"></div>' + tbl(group("captionType"), "Caption") + reelTbl,
       { tip: "„pro 1.000“ = Saves + Shares je 1.000 erreichte Konten. Template = Caption beginnt mit „TRAVEL | ADVENTURE“, alles andere zählt als Story. Ø Wiedergabe = wie lange ein Reel im Schnitt läuft, je länger, desto eher zeigt Instagram es Nicht-Followern. Wenige Posts, eher Tendenz als Beweis." });
+    html += subsCard(d, app);
 
     // Zielgruppe (Follower-Demografie)
     const dm = d.demo || {};
@@ -76,6 +77,7 @@ App.register({
     };
     draw();
     el.querySelector("#seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; me.state.sort = b.dataset.k; el.querySelectorAll("#seg button").forEach((x) => x.classList.toggle("on", x === b)); draw(); });
+    bindSubs(el, d, app);
     el.querySelectorAll(".hide-c").forEach((b) => (b.onclick = () => app.hideComment(b.dataset.id)));
     el.querySelector("#reply-btn").onclick = async (e) => {
       if (!confirm("Offene Kommentare unter den letzten 12 Posts jetzt per KI beantworten?")) return;
@@ -98,4 +100,49 @@ function funnelCard(d, app) {
     '<div class="funnel">' + step("Erreicht, folgen dir nicht", c.pvReachNonOrg, "organisch") + arrow(r1) + step("Profilaufrufe", c.pv) + arrow(r2) + step("Neue Follower", c.pvFollows) + "</div>" +
     (c.pvDays < 7 ? app.note("Profilaufrufe werden erst seit " + app.fmtDate(c.pvFrom) + " erfasst. Nach einer Woche ist der Funnel aussagekräftig.") : ""),
     { tip: "Wie viele Nicht-Follower, die deinen Content gesehen haben, auf dein Profil gehen, und wie viele davon folgen. Ist die erste Quote niedrig, liegt es am Content. Ist die zweite niedrig, liegt es am Profil (Bio, Highlights, oberste Posts)." });
+}
+
+/* Hub-Features: Einreichungen bei Hubs mitverfolgen. Gespeichert in den Skill-Einstellungen (Make, Feld subs), damit sie auf allen Geräten gleich sind. */
+function subsCard(d, app) {
+  const cfg = d.cfg;
+  if (!cfg) return app.card("Hub-Features", '<p class="muted">Einstellungen nicht geladen.</p>');
+  const subs = Array.isArray(cfg.subs) ? cfg.subs : [], esc = app.esc;
+  const stOf = (x) => x.st || (app.daysAgo(x.d) > 14 ? "nein" : "");
+  const n = subs.length, f = subs.filter((x) => stOf(x) === "ja").length;
+  const net = (day) => { const i = d.insights.find((z) => z.day === day); return i && i.follows != null ? i.follows - (i.unfollows || 0) : null; };
+  const byHub = {}; subs.forEach((x) => { const b = byHub[x.hub] || (byHub[x.hub] = { hub: x.hub, n: 0, f: 0 }); b.n++; if (stOf(x) === "ja") b.f++; });
+  const hubRows = Object.values(byHub).sort((a, b) => b.f / b.n - a.f / a.n || b.n - a.n);
+  const form = '<div class="subs-form"><select id="sub-post">' + d.posts.slice(0, 12).map((p) => '<option value="' + esc(p.sc) + '">' + app.fmtDate(p.ts) + " · " + esc((p.caption.split("\n")[0] || "Ohne Caption").slice(0, 38)) + "</option>").join("") + "</select>" +
+    '<div class="add" style="margin-top:8px"><input id="sub-hub" list="sub-hubs" placeholder="@hub" autocomplete="off" autocapitalize="off" spellcheck="false"><datalist id="sub-hubs">' + (cfg.hubs || []).map((h) => '<option value="@' + esc(h) + '">').join("") + '</datalist><button class="btn small" id="sub-add">+ Eingereicht</button></div></div>';
+  const list = n ? '<ul class="list subs">' + subs.slice().reverse().map((x) => {
+    const st = stOf(x), p = d.posts.find((q) => q.sc === x.sc), nn = st === "ja" && x.fd ? net(x.fd) : null;
+    return '<li data-id="' + esc(x.id) + '"><div class="c-main">' + app.viaLink("@" + x.hub) + ' <span class="muted small">' + app.fmtDate(x.d) + (p ? ' · <a href="' + esc(p.link) + '" target="_blank" rel="noopener">Post</a>' : "") + "</span>" +
+      (nn != null ? '<div class="muted small">Am Feature-Tag ' + app.signed(nn) + " Follower netto</div>" : "") + '</div><span class="right">' +
+      (st === "ja" ? '<span class="pill green">gefeatured</span>' : st === "nein" ? '<span class="pill">nicht</span>' : '<button class="btn small" data-st="ja">✓ Feature</button><button class="btn small ghost" data-st="nein">Nein</button>') +
+      '<button class="btn small ghost" data-st="del" aria-label="löschen">✕</button></span></li>';
+  }).join("") + "</ul>" : '<p class="muted">Noch nichts eingereicht.</p>';
+  const stats = hubRows.length > 1 ? '<h4 class="sub">Quote je Hub</h4>' + hubRows.map((b) => '<div class="src-h"><span>' + app.viaLink("@" + b.hub) + '</span><span class="muted small">' + b.f + " von " + b.n + "</span></div>").join("") : "";
+  return app.card("Hub-Features" + (n ? ' <span class="pill' + (f ? " green" : "") + '">' + f + " / " + n + "</span>" : ""), form + list + stats,
+    { id: "subs", tip: "Trag ein, welchen Post du bei welchem Hub eingereicht hast (getaggt oder Hub-Hashtag). Wird er gezeigt, auf „✓ Feature“ tippen. Ohne Feature nach 14 Tagen zählt er als „nicht“. Die Session meldet Features, die sie bei Hub-Besuchen sieht, im Dashboard." });
+}
+function bindSubs(el, d, app) {
+  const box = el.querySelector("#subs"); if (!box || !d.cfg) return;
+  const cur = () => (Array.isArray(d.cfg.subs) ? d.cfg.subs.slice() : []);
+  const save = async (subs, msg) => {
+    try { await app.saveCfg(Object.assign({}, d.cfg, { subs: subs.slice(-100) })); app.toast(msg); app.render(); }
+    catch (e) { app.toast("Nicht gespeichert: " + e.message, "bad"); }
+  };
+  const add = box.querySelector("#sub-add");
+  if (add) add.onclick = () => {
+    const sc = box.querySelector("#sub-post").value, hub = box.querySelector("#sub-hub").value.trim().replace(/^@/, "").toLowerCase();
+    if (!sc || !/^[a-z0-9._]{1,30}$/.test(hub)) return app.toast("Post und @hub wählen", "bad");
+    const s = cur(); if (s.some((x) => x.sc === sc && x.hub === hub)) return app.toast("Schon eingetragen");
+    s.push({ id: Date.now().toString(36), sc, hub, d: app.today(), st: "" }); save(s, "Eingetragen ✓");
+  };
+  box.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => {
+    const id = b.closest("li").dataset.id, s = cur(), i = s.findIndex((x) => x.id === id); if (i < 0) return;
+    if (b.dataset.st === "del") { if (!confirm("Eintrag löschen?")) return; s.splice(i, 1); }
+    else s[i] = Object.assign({}, s[i], { st: b.dataset.st, fd: b.dataset.st === "ja" ? app.today() : "" });
+    save(s, "Gespeichert ✓");
+  }));
 }

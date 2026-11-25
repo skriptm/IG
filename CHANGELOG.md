@@ -33,6 +33,13 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – v1.17.0 (Hub-Features, Gefolgt-Obergrenze)
+- Content: neue Karte „Hub-Features“. Post und @hub wählen, „+ Eingereicht“; danach „✓ Feature“ oder „Nein“, ohne Feature nach 14 Tagen automatisch „nicht“. Bei Features: Netto-Follower am Feature-Tag. Quote je Hub ab zwei Hubs. Gespeichert in den Skill-Einstellungen (Make, Feld `subs`, max. 100), also auf allen Geräten gleich; jede Änderung ist ein `cfg_set` (3 Credits).
+- Einstellungen → Limits: neu „Gefolgt höchstens“ (`limits.following_max`, Standard 1.500). Speichern in den Einstellungen übernimmt `subs` aus den aktuellen Daten (wird nicht überschrieben).
+- Follower: Kachel „Folge ich“ zeigt die Obergrenze, wird orange bei Erreichen.
+- Select-Felder haben jetzt denselben Stil wie Eingabefelder.
+- Skill V8: Gefolgt-Obergrenze (erst entfolgen, dann höchstens so viele Follows wie entfolgt), meldet gesehene Hub-Features im Dashboard.
+
 ### 25.11.2026 – Gegenbesuch aufgeräumt (App unverändert, v1.16.0)
 - Gegenbesuch-Speicher 209450: 14 von 47 Einträgen gelöscht (10 Kernliste, 2 Bots @jalaleddin.mollaei und @whoalabofficial, 2 schon besucht). Seit dem Vormerken am 24.11. waren nur 3 besucht worden.
 - Make „IG App API“, `prep`: Gegenbesuch ohne Kernliste-Accounts; Einträge verfallen 7 Tage nach Vormerken bzw. Kommentar (vorher nur ohne Vormerken). Verfallene kommen in `gbX` und werden beim nächsten `log` gelöscht.

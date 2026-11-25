@@ -4,13 +4,13 @@ App.register({
   icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   tab: "engagement", draft: null, base: null,
   TABS: [["engagement", "Engagement"], ["listen", "Listen"], ["app", "App"]],
-  LIMITS: [["day", "Kommentare / Tag"], ["hour", "Kommentare / Std."], ["follow_day", "Follows / Tag"], ["follow_session", "Follows / Session"], ["follow_min", "Folgen ab Followern"], ["follow_max", "Folgen bis Followern"], ["unfollow_days", "Entfolgen nach Tagen"], ["unfollow_day", "Entfolgen / Tag"], ["unfollow_session", "Entfolgen / Session"], ["engage_min", "Engagement ab Foll."], ["engage_max", "Engagement bis Foll."]],
+  LIMITS: [["day", "Kommentare / Tag"], ["hour", "Kommentare / Std."], ["follow_day", "Follows / Tag"], ["follow_session", "Follows / Session"], ["follow_min", "Folgen ab Followern"], ["follow_max", "Folgen bis Followern"], ["following_max", "Gefolgt höchstens"], ["unfollow_days", "Entfolgen nach Tagen"], ["unfollow_day", "Entfolgen / Tag"], ["unfollow_session", "Entfolgen / Session"], ["engage_min", "Engagement ab Foll."], ["engage_max", "Engagement bis Foll."]],
   BUDGET: [["core", "Kernliste"], ["feed", "Startseite"], ["hubs", "Hubs"], ["hashtags", "Hashtags"]],
 
   norm(c) {
     c = JSON.parse(JSON.stringify(c || {}));
     ["nogo", "hashtags", "hubs", "friends", "watchlist", "taboo", "examples"].forEach((k) => { if (!Array.isArray(c[k])) c[k] = []; });
-    c.limits = Object.assign({ day: 40, hour: 14, follow_day: 25, follow_session: 6, follow_min: 2000, follow_max: 50000, unfollow_days: 7, unfollow_day: 10, unfollow_session: 5, engage_min: 200, engage_max: 150000 }, c.limits);
+    c.limits = Object.assign({ day: 40, hour: 14, follow_day: 25, follow_session: 6, follow_min: 2000, follow_max: 50000, following_max: 1500, unfollow_days: 7, unfollow_day: 10, unfollow_session: 5, engage_min: 200, engage_max: 150000 }, c.limits);
     c.budget = Object.assign({ core: 3, feed: 1, hubs: 1, hashtags: 0 }, c.budget);
     c.quiet = Object.assign({ on: true, from: "22:00", to: "07:00" }, c.quiet);
     c.goal = Object.assign({ followers: 0, date: "" }, c.goal);
@@ -119,7 +119,7 @@ App.register({
     bar.querySelector("#sb-undo").onclick = () => { me.draft = me.norm(me.base); app.editing = false; me.pane(el, app.data, app); };
     bar.querySelector("#sb-save").onclick = async (e) => {
       const b = e.currentTarget; b.disabled = true; b.textContent = "Speichere …";
-      try { const cur = (app.data && app.data.cfg) || {}; if (Array.isArray(cur.watchlist)) me.draft.watchlist = cur.watchlist.slice(); if (typeof cur.fans_to_watchlist === "boolean") me.draft.fans_to_watchlist = cur.fans_to_watchlist;
+      try { const cur = (app.data && app.data.cfg) || {}; if (Array.isArray(cur.watchlist)) me.draft.watchlist = cur.watchlist.slice(); if (typeof cur.fans_to_watchlist === "boolean") me.draft.fans_to_watchlist = cur.fans_to_watchlist; if (Array.isArray(cur.subs)) me.draft.subs = cur.subs.slice();
         const saved = await app.saveCfg(me.draft); me.base = me.norm(saved); me.draft = me.norm(saved); app.editing = false; app.renderHero(); me.pane(el, app.data, app); app.toast("Gespeichert ✓ – gilt ab der nächsten Session"); }
       catch (err) { b.disabled = false; b.textContent = "Speichern"; app.toast("Nicht gespeichert: " + err.message, "bad"); }
     };

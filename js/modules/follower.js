@@ -18,7 +18,7 @@ App.register({
     const gain = (lastS.followers || 0) - (first.followers || 0);
     let html = '<section class="tiles" data-anim>' +
       tile("Follower", lastS.followers, { s: app.signed(gain) + " seit " + app.fmtDate(first.ts) }) +
-      tile("Folge ich", lastS.following) +
+      tile("Folge ich", lastS.following, { s: "max. " + app.num(Number(lim.following_max) || 1500) }, lastS.following >= (Number(lim.following_max) || 1500) ? "hot" : "") +
       tile("Follows heute", today, { inline: "<small> / " + cap + "</small>" }) +
       tile("Follow-backs", back, { s: rows.length ? app.pct(back / rows.length, 0) + " von " + rows.length : "" }, "good") +
       tile("Entfolgen fällig", due, { s: "ab " + ud + " Tagen" }, due ? "hot" : "") +

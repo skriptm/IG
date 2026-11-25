@@ -33,6 +33,12 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – Auto-Reply als Google Apps Script (Parallellauf, App unverändert)
+- Neu: `automation/ig-autoreply.gs`, läuft auf script.google.com alle 5 Minuten, ohne Make-Credits. Prüft die 8 neuesten Posts (nur bei geänderter Kommentarzahl), beantwortet Kommentare tagsüber 07:30–21:30 mit demselben Prompt wie Make (Claude Sonnet 5.5, Effort low), frühestens 4 Minuten nach dem Kommentar, höchstens 24 Stunden alt. Fragen, Spam, Nacht, unsichere Antworten bleiben offen (App → Unbeantwortet).
+- Schlüssel nur in den Skripteigenschaften (`ANTHROPIC_KEY`, `IG_TOKEN`), nie im Code. Meta: App „lauinger-hub“, Systemnutzer-Token (läuft nicht ab), Konfiguration „Instagram API (Unified Login)“.
+- `MODE=draft` (Parallellauf): schreibt nur Entwürfe ins Google Sheet „IG Auto-Reply Protokoll“; Make antwortet weiter. Danach `MODE=live` und Make-Auto-Reply abschalten. Offen bis dahin: Gegenbesuch-Eintrag neuer Kommentierer (macht noch Make).
+- Lokal mit simuliertem Google, Instagram und Claude getestet (Entwurf, Live, Frage, Spam, Nacht, zu alt, schon beantwortet, unsicher).
+
 ### 25.11.2026 – Auto-Reply ohne Mails (App unverändert, v1.17.0)
 - Make „IG Auto-Reply“ (2841603): alle Mails entfernt („Beantwortet“, „Frage“, „Nacht-Kommentar“, „Bot unsicher“) samt den zwei „GetMedia“-Schritten, die nur für die Mails da waren. Fragen, Nacht-Kommentare und unsichere KI-Antworten bleiben unbeantwortet und erscheinen in der App unter Content → „Unbeantwortet“. Kosten pro beantwortetem Kommentar: 5 statt 7 Credits, Nacht-Kommentare 2 statt 4.
 - Wunsch André: auf längere Sicht eigenen Code statt Make (Plan: Google Apps Script).

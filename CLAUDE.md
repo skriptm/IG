@@ -3,7 +3,7 @@
 Diese Datei wird in Claude Code automatisch gelesen. Sie gilt für jede Bearbeitung dieses Repos.
 
 ## Vor jeder Bearbeitung
-1. `CHANGELOG.md` lesen (aktueller Stand, bewusste Entscheidungen, offene Fragen, Make-Szenarien).
+1. `CHANGELOG.md` lesen (aktueller Stand, bewusste Entscheidungen, offene Fragen, Make-Szenarien) und `docs/UEBERGABE.md` (was offen ist).
 2. Bei Unklarheit zuerst André fragen, nicht raten. Vorschläge erst als Optionen mit Aufwand zeigen, dann nach seiner Rückmeldung umsetzen.
 
 ## Aufbau

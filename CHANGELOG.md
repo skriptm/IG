@@ -29,9 +29,13 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 - IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
 - IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, Data Store 208242.
 - IG Hub-Alarm (10170662): täglich 18:45, Datensatz `fresh` im Data Store 208242.
-- IG Auto-Reply (2841603), IG Offene Kommentare beantworten (10149203).
+- IG Auto-Reply (2841603, ohne Mails seit 25.11.), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 25.11.2026 – Auto-Reply ohne Mails (App unverändert, v1.17.0)
+- Make „IG Auto-Reply“ (2841603): alle Mails entfernt („Beantwortet“, „Frage“, „Nacht-Kommentar“, „Bot unsicher“) samt den zwei „GetMedia“-Schritten, die nur für die Mails da waren. Fragen, Nacht-Kommentare und unsichere KI-Antworten bleiben unbeantwortet und erscheinen in der App unter Content → „Unbeantwortet“. Kosten pro beantwortetem Kommentar: 5 statt 7 Credits, Nacht-Kommentare 2 statt 4.
+- Wunsch André: auf längere Sicht eigenen Code statt Make (Plan: Google Apps Script).
 
 ### 25.11.2026 – v1.17.0 (Hub-Features, Gefolgt-Obergrenze)
 - Content: neue Karte „Hub-Features“. Post und @hub wählen, „+ Eingereicht“; danach „✓ Feature“ oder „Nein“, ohne Feature nach 14 Tagen automatisch „nicht“. Bei Features: Netto-Follower am Feature-Tag. Quote je Hub ab zwei Hubs. Gespeichert in den Skill-Einstellungen (Make, Feld `subs`, max. 100), also auf allen Geräten gleich; jede Änderung ist ein `cfg_set` (3 Credits).

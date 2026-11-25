@@ -33,6 +33,11 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – Gegenbesuch aufgeräumt (App unverändert, v1.16.0)
+- Gegenbesuch-Speicher 209450: 14 von 47 Einträgen gelöscht (10 Kernliste, 2 Bots @jalaleddin.mollaei und @whoalabofficial, 2 schon besucht). Seit dem Vormerken am 24.11. waren nur 3 besucht worden.
+- Make „IG App API“, `prep`: Gegenbesuch ohne Kernliste-Accounts; Einträge verfallen 7 Tage nach Vormerken bzw. Kommentar (vorher nur ohne Vormerken). Verfallene kommen in `gbX` und werden beim nächsten `log` gelöscht.
+- Skill V7: Gegenbesuch immer liken (kein Kommentar-Budget nötig), Kommentar nur mit Budget, jeder bearbeitete Handle in `gbdone`.
+
 ### 25.11.2026 – v1.16.0 (Verschlankung: 43 → 22 Karten)
 - Übersicht (9 → 4): „Heute“ enthält jetzt Session-Zeile, „Diese Stunde“ und das Follower-Ziel als Balken. „Diese Woche“ enthält das Netto-Chart. „Zu tun“ hat eine Zeile „Neu bei Hubs & Kernliste“. Gelöscht: Karten „Engagement-Session“, „Follower-Ziel“, „Netto-Follower pro Tag“, „Fokus diese Woche“ (stand gleich in Content). Neu im Kern: `App.hubFresh()`; `App.kpi()` ohne Caption-Vergleich.
 - Follower (8 → 5 inkl. Kacheln): „Conversions“ und „Neue Follower“ zu einer Liste, Conversions mit ★. Gelöscht: „Aktivität pro Session“, „Letzte Kommentare von dir“ (Kommentar steht pro Follow in „Gefolgt“).

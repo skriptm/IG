@@ -33,6 +33,11 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – Engagement-Helfer v7 und Skill V6 (App unverändert, v1.15.2)
+- Make, Data Store 209784, Record `helpers` (Helfer-Version `hv` 7): `p` liest Follower, Gefolgt, Beiträge und liefert `ratio`/`rok` (Gefolgt mindestens 25 % der Follower). Neuer Helfer `c`: Vorfilter für 20 bis 30 Handles über Instagram-Daten ohne Profilbesuch (Follower-Spanne, Beiträge, Verhältnis, Post-Alter, Likes, privat, folgt schon), Ergebnis in `localStorage.cr`. `h`: Kommentar nach Bildtyp (Licht, Nebel, Berge, Wald, Nacht, Wasser, sonst Pool), Bug „own“ behoben (Autor aus Post-Meta statt Seitentext). `e`: wartet auf das Profil, schließt den Dialog wieder, Ergebnis auch in `localStorage.el`.
+- Getestet mit Beispieldaten (21 Tests, u. a. @wander.nine, @oneshot__photo, @tommytoro). Alter Helfer-Code als Backup gesichert (nicht im Repo).
+- Skill V6: Quellen Feed-Vorschläge, Hashtag-Autoren, kleine Hubs (unter ca. 100K). Vorfilter `c` vor jedem Profilbesuch, `e` im Hintergrund, nur Windows-Browser, Start nur manuell (geplante Sessions am 24.11. gelöscht).
+
 ### 25.11.2026 – v1.15.2 (Hubs und Hashtags klickbar)
 - Neuer Helfer `App.viaLink` (core.js): `@hub` öffnet das Instagram-Profil, `#tag` die Hashtag-Seite (Instagram leitet auf die Suche um, Top-Posts), alles andere bleibt Text. Namen werden auf erlaubte Zeichen geprüft. Links öffnen im neuen Tab (`noopener noreferrer`).
 - Reiter Follower: Hubs und Hashtags in „Welche Quelle bringt was?“ (Gruppen bleiben Text), in der Gefolgt-Liste, bei Conversions und bei „Letzte Kommentare“ klickbar.

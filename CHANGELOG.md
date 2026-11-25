@@ -33,6 +33,14 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – v1.16.0 (Verschlankung: 43 → 22 Karten)
+- Übersicht (9 → 4): „Heute“ enthält jetzt Session-Zeile, „Diese Stunde“ und das Follower-Ziel als Balken. „Diese Woche“ enthält das Netto-Chart. „Zu tun“ hat eine Zeile „Neu bei Hubs & Kernliste“. Gelöscht: Karten „Engagement-Session“, „Follower-Ziel“, „Netto-Follower pro Tag“, „Fokus diese Woche“ (stand gleich in Content). Neu im Kern: `App.hubFresh()`; `App.kpi()` ohne Caption-Vergleich.
+- Follower (8 → 5 inkl. Kacheln): „Conversions“ und „Neue Follower“ zu einer Liste, Conversions mit ★. Gelöscht: „Aktivität pro Session“, „Letzte Kommentare von dir“ (Kommentar steht pro Follow in „Gefolgt“).
+- Content (10 → 7): Reels-Tabelle in „Was funktioniert“. „Zielgruppe“ zugeklappt. Gelöscht: „Konto-Insights“ (doppelt), „Reichweite pro Monat“. Ungenutzte Insight-Felder im Kern gelöscht (reachByFormat, reachReel, reachStory, engaged, linkTaps, adPct, net).
+- Kontakte: neu „Neu bei Hubs & Kernliste“ (aus der Übersicht).
+- Einstellungen: 6 Unter-Reiter → 3 (Engagement, Listen, App). Limits um Follower-Obergrenze und Entfolgen (Tage, pro Tag, pro Session) ergänzt, Standardwerte an die aktuellen Regeln angepasst (40/Tag, 14/Std., 25 Follows, 2.000–50.000). Beispiel im Feld „Beispielkommentare“ ohne Frage.
+- CSS `.advice1` gelöscht, neu `.goal`, `.chip.conv`.
+
 ### 25.11.2026 – v1.15.3 (Kommentare ausblenden, aktuelle Session-Zeile)
 - Content, „Unbeantwortet“: ✕ blendet einen offenen Kommentar aus (nur in der App, gespeichert auf dem Gerät unter `chide`; bei Instagram bleibt er). Zählt auch in „Zu tun“ nicht mehr mit. Neu im Kern: `App.hideComment()`.
 - Übersicht, „Engagement-Session“: Statuszeile kommt aus der letzten geloggten Session (`stats.sessions`) statt aus dem Make-Record `session`, den der Skill seit V4 nicht mehr schreibt (zeigte noch den 15.11.). Code für `session`/„läuft“ gelöscht.

@@ -1,5 +1,5 @@
-/* Follower: alles, was die Engagement-Sessions bewirken. Kacheln, Quellen-Auswertung, Gefolgt-Liste, Follower-Kurve,
-   Aktivität pro Session, Conversions, neue Follower, letzte Kommentare */
+/* Follower: alles, was die Engagement-Sessions bewirken. Kacheln, Quellen-Auswertung, Gefolgt-Liste, Follower-Kurve
+   mit Follows pro Tag, neue Follower (Conversions markiert) */
 App.register({
   id: "follower", title: "Follower", order: 2,
   icon: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M19 8v6M16 11h6"/></svg>',
@@ -57,17 +57,13 @@ App.register({
     html += app.card("Follower & Follows pro Tag",
       '<div class="chart-box" id="ch-ff"></div><div class="legend"><i style="background:var(--accent)"></i>Follows <i style="background:var(--green)"></i>davon zurück</div><div class="chart-box" id="ch-fd"></div>');
 
-    html += app.card("Aktivität pro Session", '<div class="legend"><i style="background:var(--accent)"></i>Kommentare <i style="background:var(--sand)"></i>Likes <i style="background:var(--green)"></i>Neue Follower</div><div class="chart-box" id="ch-sessions"></div>');
+    // Neue Follower; ★ = Conversion (das Skript hatte in den 14 Tagen davor Kontakt)
+    const conv = {}; s.conversions.forEach((c) => { if (!conv[c.h]) conv[c.h] = c; });
+    const nf = [...new Set(s.newFollowers.map((f) => f.h).concat(Object.keys(conv)))];
+    if (nf.length) html += app.card("Neue Follower <span class=\"pill\">" + nf.length + "</span>" + (s.conversions.length ? ' <span class="pill accent">★ ' + Object.keys(conv).length + "</span>" : ""),
+      app.more(nf.slice(0, 60).map((h) => '<a class="chip' + (conv[h] ? " conv" : "") + '" href="' + app.profile(h) + '" target="_blank" rel="noopener"' + (conv[h] ? ' title="über ' + app.esc(conv[h].via || conv[h].block || "") + '"' : "") + ">" + (conv[h] ? "★ " : "") + "@" + app.esc(h) + "</a>"), 12, "chips"),
+      { tip: "Wer dir neu folgt. ★ = Conversion: Das Skript hatte in den 14 Tagen davor Kontakt (Kommentar oder Follow). Lange drücken zeigt die Quelle." });
 
-    if (s.conversions.length) html += app.card("Conversions <span class=\"pill\">" + s.conversions.length + "</span>", app.more(s.conversions.map((c) =>
-      "<li>" + app.userLink(c.h) + '<span class="muted">über ' + app.viaLink(c.via || c.block || "–") + '</span><span class="right muted">' + app.fmtDate(c.ts) + "</span></li>")),
-      { tip: "Neue Follower, mit denen das Skript in den 14 Tagen davor Kontakt hatte." });
-
-    if (s.newFollowers.length) html += app.card("Neue Follower <span class=\"pill\">" + s.newFollowers.length + "</span>", app.more(s.newFollowers.slice(0, 40).map((f) => '<a class="chip" href="' + app.profile(f.h) + '" target="_blank" rel="noopener">@' + app.esc(f.h) + "</a>"), 12, "chips"));
-
-    const acts = s.activity.filter((a) => a.act === "comment" && a.text).slice(0, 25);
-    if (acts.length) html += app.card("Letzte Kommentare von dir", app.more(acts.map((a) =>
-      '<li><div><a href="https://www.instagram.com/p/' + encodeURIComponent(a.sc || "") + '/" target="_blank" rel="noopener"><b>@' + app.esc(a.h) + '</b></a> <span class="muted small">' + app.viaLink(a.via || a.block || "") + " · " + app.fmtDate(a.ts, true) + '</span></div><div class="ctext">' + app.esc(a.text) + "</div></li>"), 5, "list comments"));
     el.innerHTML = html;
 
     const list = el.querySelector("#fl-list");
@@ -90,8 +86,6 @@ App.register({
     rows.forEach((r) => { const k = app.localDay(r.ts), b = byDay[k] || (byDay[k] = { n: 0, back: 0 }); b.n++; if (r.st.key === "back") b.back++; });
     Charts.bars(el.querySelector("#ch-fd"), Object.keys(byDay).sort().map((k) => ({ x: app.fmtDate(k), parts: [{ v: byDay[k].back, c: "var(--green)" }, { v: byDay[k].n - byDay[k].back, c: "var(--accent)" }],
       tip: "<b>" + app.fmtDate(k) + "</b><br>" + byDay[k].n + " Follows · " + byDay[k].back + " zurück" })));
-    Charts.bars(el.querySelector("#ch-sessions"), s.sessions.map((x) => ({ x: app.fmtDate(x.ts), parts: [{ v: x.comments, c: "var(--accent)" }, { v: x.likes, c: "var(--sand)" }, { v: x.new, c: "var(--green)" }],
-      tip: app.fmtDate(x.ts, true) + "<br>💬 " + x.comments + " · ♥ " + x.likes + " · ➕ " + x.new + (x.conv ? " · 🎯 " + x.conv : "") })));
     el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));
   }
 });

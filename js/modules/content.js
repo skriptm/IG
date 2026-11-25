@@ -1,4 +1,4 @@
-/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite, Funnel, Ranking, Formate, Captions, Reels, Monate, Konto-Insights, Zielgruppe */
+/* Content: Kennzahlen, unbeantwortete Kommentare, Reichweite pro Tag, Funnel, Ranking, Was funktioniert (Formate, Captions, Reels), Zielgruppe */
 App.register({
   id: "content", title: "Content", order: 3,
   icon: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.6"/></svg>',
@@ -35,29 +35,12 @@ App.register({
       return Object.entries(m).map(([g, a]) => { const r = a.reduce((s, p) => s + p.reach, 0); return { g, n: a.length, reach: Math.round(r / a.length), signal: r ? Math.round(a.reduce((s, p) => s + p.saves + p.shares, 0) / r * 10000) / 10 : null }; }).sort((a, b) => b.reach - a.reach); };
     const tbl = (rows, head) => '<div class="table-wrap"><table class="t"><thead><tr><th>' + head + "</th><th>Posts</th><th>Ø Reichweite</th><th>pro 1.000</th></tr></thead><tbody>" +
       rows.map((r) => "<tr><td>" + app.esc(r.g) + "</td><td>" + r.n + "</td><td>" + app.num(r.reach) + "</td><td>" + app.d1(r.signal) + "</td></tr>").join("") + "</tbody></table></div>";
-    html += app.card("Was funktioniert", tbl(group("format"), "Format") + '<div style="margin-top:12px"></div>' + tbl(group("captionType"), "Caption"),
-      { tip: "„pro 1.000“ = Saves + Shares je 1.000 erreichte Konten. Template = Caption beginnt mit „TRAVEL | ADVENTURE“, alles andere zählt als Story. Wenige Posts, eher Tendenz als Beweis." });
-
-    // Reels: Wiedergabedauer
     const reels = posts.filter((p) => p.watchAvg != null);
-    if (reels.length) html += app.card("Reels <span class=\"pill\">" + reels.length + "</span>",
-      '<div class="table-wrap"><table class="t"><thead><tr><th>Reel</th><th>Ø Wiedergabe</th><th>Aufrufe</th><th>Reichweite</th></tr></thead><tbody>' +
-      reels.map((p) => '<tr><td><a href="' + app.esc(p.link) + '" target="_blank" rel="noopener">' + app.fmtDate(p.ts) + "</a></td><td><b>" + app.d1(p.watchAvg) + " s</b></td><td>" + app.num(p.views) + "</td><td>" + app.num(p.reach) + "</td></tr>").join("") + "</tbody></table></div>",
-      { tip: "Ø Wiedergabe = wie lange ein Reel im Schnitt läuft. Je länger, desto eher zeigt Instagram es Leuten, die dir noch nicht folgen. Wird täglich um 06:10 aktualisiert, nur für die 8 neuesten Posts." });
+    const reelTbl = reels.length ? '<h4 class="sub">Reels</h4><div class="table-wrap"><table class="t"><thead><tr><th>Reel</th><th>Ø Wiedergabe</th><th>Aufrufe</th><th>Reichweite</th></tr></thead><tbody>' +
+      reels.map((p) => '<tr><td><a href="' + app.esc(p.link) + '" target="_blank" rel="noopener">' + app.fmtDate(p.ts) + "</a></td><td><b>" + app.d1(p.watchAvg) + " s</b></td><td>" + app.num(p.views) + "</td><td>" + app.num(p.reach) + "</td></tr>").join("") + "</tbody></table></div>" : "";
+    html += app.card("Was funktioniert", tbl(group("format"), "Format") + '<div style="margin-top:12px"></div>' + tbl(group("captionType"), "Caption") + reelTbl,
+      { tip: "„pro 1.000“ = Saves + Shares je 1.000 erreichte Konten. Template = Caption beginnt mit „TRAVEL | ADVENTURE“, alles andere zählt als Story. Ø Wiedergabe = wie lange ein Reel im Schnitt läuft, je länger, desto eher zeigt Instagram es Nicht-Followern. Wenige Posts, eher Tendenz als Beweis." });
 
-    html += app.card("Reichweite pro Monat", '<div class="chart-box" id="ch-months"></div>', { tip: "Ø Reichweite pro Post je Monat." });
-
-    // Konto-Insights
-    const L = ins[ins.length - 1];
-    if (L) {
-      html += app.card("Konto-Insights <small>" + app.fmtDate(L.day) + "</small>",
-        '<p class="lead">Von <b>' + app.num(L.reach) + "</b> erreichten Konten kamen <b>" + app.pct(L.adPct) + "</b> über Werbung. Organisch waren es <b>" + app.num(L.reachOrganic) + "</b>, davon Reels <b>" + app.num(L.reachReel) + "</b> und Stories <b>" + app.num(L.reachStory) + "</b>.</p>" +
-        '<div class="stats">' + app.stat("Nicht-Follower", app.num(L.reachNon), "Follower " + app.num(L.reachFollower)) + app.stat("Follows / Unf.", app.num(L.follows) + " / " + app.num(L.unfollows), "Netto " + app.signed(L.net)) +
-        app.stat("Aktive Konten", app.num(L.engaged), "Interaktionen " + app.num(L.interactions)) + app.stat("Saves / Shares", app.num(L.saves) + " / " + app.num(L.shares), "Link-Klicks " + app.num(L.linkTaps)) + "</div>" +
-        '<div class="table-wrap" style="margin-top:12px"><table class="t"><thead><tr><th>Tag</th><th>Reichw.</th><th>organisch</th><th>+ / −</th><th>🔖 / ↗</th></tr></thead><tbody>' +
-        ins.slice().reverse().map((x) => "<tr><td>" + app.fmtDate(x.day) + "</td><td>" + app.num(x.reach) + "</td><td>" + app.num(x.reachOrganic) + "</td><td>+" + app.num(x.follows) + " / −" + app.num(x.unfollows) + "</td><td>" + app.num(x.saves) + " / " + app.num(x.shares) + "</td></tr>").join("") +
-        "</tbody></table></div>", { tip: "„Werbung“ ist Reichweite aus bezahlten Anzeigen. „organisch“ ist, was dein Content allein schafft. „+ / −“ = neue Follower / Unfollows, 🔖 / ↗ = Saves / Shares." });
-    }
     // Zielgruppe (Follower-Demografie)
     const dm = d.demo || {};
     if (dm.age || dm.country) {
@@ -66,11 +49,11 @@ App.register({
       const bars = (arr, n, name) => { const t = tot(arr), rows = n ? top(arr, n) : arr, mx = Math.max(1, ...rows.map((e) => e.v));
         return rows.map((e) => '<div class="roi-row"><div class="roi-h"><span>' + app.esc(name ? name(e.k) : e.k) + '</span><span class="muted small">' + app.pct(e.v / t) + '</span></div><div class="roi-bar"><i style="width:' + Math.round(e.v / mx * 100) + '%"></i></div></div>').join(""); };
       const g = {}; (dm.gender || []).forEach((e) => (g[e.k] = e.v)); const known = (g.F || 0) + (g.M || 0);
-      html += app.card("Zielgruppe <small>" + app.fmtDate(dm.day) + "</small>",
+      html += app.card("Zielgruppe <small>" + app.fmtDate(dm.day) + "</small>", '<details class="more"><summary>Anzeigen</summary>' +
         (known ? '<div class="stats">' + app.stat("Männer", app.pct((g.M || 0) / known)) + app.stat("Frauen", app.pct((g.F || 0) / known)) + app.stat("Top-Alter", app.esc((top(dm.age, 1)[0] || {}).k || "–")) + app.stat("Top-Land", app.esc((top(dm.country, 1)[0] || {}).k || "–")) + "</div>" : "") +
         (dm.age ? '<h4 class="sub">Alter</h4>' + bars(dm.age, 0) : "") +
         (dm.country ? '<h4 class="sub">Länder</h4>' + bars(dm.country, 6, (k2) => { try { return land ? land.of(k2) : k2; } catch (e) { return k2; } }) : "") +
-        (dm.city ? '<h4 class="sub">Städte</h4>' + bars(dm.city, 6, (k2) => k2.split(",")[0]) : ""),
+        (dm.city ? '<h4 class="sub">Städte</h4>' + bars(dm.city, 6, (k2) => k2.split(",")[0]) : "") + "</details>",
         { tip: "Wer dir folgt, laut Instagram. Geschlecht nur von Followern, bei denen Instagram es kennt. Länder und Städte: Anteil unter den von Instagram gelieferten Top-Einträgen. Genau diese Zahlen fragen Marken bei Kooperationen ab." });
     }
     el.innerHTML = html;
@@ -80,11 +63,6 @@ App.register({
       return { x: app.fmtDate(x.day), parts: [{ v: x.reachFollower || 0, c: "var(--sand)" }, { v: non, c: "var(--accent)" }, { v: ad, c: "#5a5550" }],
         tip: app.fmtDate(x.day) + "<br><b>" + app.num(x.reach) + "</b> erreicht<br>" + app.num(x.reachFollower) + " Follower · " + app.num(x.reachNon) + " neu" + (ad ? "<br>davon Werbung " + app.num(ad) : "") };
     }));
-
-    const months = {}; posts.filter((p) => p.reach && p.ts).forEach((p) => { const m = String(p.ts).slice(0, 7); const x = months[m] || (months[m] = { m, n: 0, r: 0, ss: 0 }); x.n++; x.r += p.reach; x.ss += p.saves + p.shares; });
-    const mrows = Object.values(months).sort((a, b) => (a.m < b.m ? -1 : 1));
-    const mon = (m) => new Date(m + "-01T12:00").toLocaleDateString("de-CH", { month: "short", year: "2-digit" });
-    Charts.bars(el.querySelector("#ch-months"), mrows.map((x) => ({ x: mon(x.m), parts: [{ v: Math.round(x.r / x.n), c: "var(--accent)" }], tip: "<b>" + mon(x.m) + "</b><br>Ø " + app.num(Math.round(x.r / x.n)) + " Reichweite<br>" + x.n + " Posts · " + x.ss + " Saves+Shares" })), { height: 170 });
 
     const list = el.querySelector("#ranking");
     const draw = () => {

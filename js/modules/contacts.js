@@ -1,4 +1,4 @@
-/* Kontakte: Gegenbesuch mit Auswahl, „Alle merken“ und gemeinsame Liste „Als Nächstes besuchen“ (Warteschlange + Merkliste) */
+/* Kontakte: Gegenbesuch mit Auswahl, „Alle merken“, gemeinsame Liste „Als Nächstes besuchen“ (Warteschlange + Merkliste), neue Posts bei Hubs & Kernliste */
 App.register({
   id: "contacts", title: "Kontakte", order: 4,
   icon: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.6c2 .7 3.2 2.5 3.6 5.4"/></svg>',
@@ -13,7 +13,7 @@ App.register({
         '<div class="add"><input id="wl-add" placeholder="@handle oder Profil-Link" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn small" id="wl-btn">+ Hinzufügen</button></div><div class="err" id="wl-err"></div>' +
         '<ul class="list contacts" id="q-list"></ul>' +
         '<div class="switchrow" style="margin-top:12px"><span>Top-Fans automatisch hinzufügen</span><label class="switch"><input type="checkbox" id="fans-sw"><span></span></label></div>',
-        { tip: "Die nächste Session besucht alle hier zuerst (Like + Kommentar) und nimmt sie danach von der Liste. „Gegenbesuch“ kommt von oben, „Merkliste“ hast du eingetragen oder es ist ein Top-Fan. ✕ entfernt ganz." });
+        { tip: "Die nächste Session besucht alle hier zuerst (Like + Kommentar) und nimmt sie danach von der Liste. „Gegenbesuch“ kommt von oben, „Merkliste“ hast du eingetragen oder es ist ein Top-Fan. ✕ entfernt ganz." }) + freshCard(d, app);
 
     const openL = el.querySelector("#open-list"), qL = el.querySelector("#q-list"), selBtn = el.querySelector("#mark-sel");
     const row = (c, queued) =>
@@ -105,3 +105,14 @@ App.register({
     openL.addEventListener("click", onClick); qL.addEventListener("click", onClick);
   }
 });
+
+/* Neu bei Hubs & Kernliste (Hub-Alarm, Make täglich 18:45) */
+function freshCard(d, app) {
+  if (!d.freshAt) return "";
+  const hf = App.hubFresh(d);
+  return app.card("Neu bei Hubs & Kernliste <span class=\"pill" + (hf.open ? " accent" : "") + "\">" + hf.open + "</span>",
+    hf.list.length ? app.more(hf.list.map((x) => '<li><a href="' + app.esc(x.link) + '" target="_blank" rel="noopener"><b>@' + app.esc(x.h) + "</b></a>" +
+      '<span class="muted">' + (x.hub ? "Hub" : "Kernliste") + " · " + app.esc(app.rel(x.ts)) + "</span>" +
+      '<span class="right">' + (x.done ? '<span class="pill green">✓ kommentiert</span>' : '<span class="pill">offen</span>') + "</span></li>")) : '<p class="muted">Keine neuen Posts in den letzten 26 Stunden.</p>',
+    { id: "hubs", tip: "Make prüft täglich um 18:45 alle Hubs und die Kernliste. Die nächste Session arbeitet diese Liste zuerst ab. Stand: " + app.fmtDate(d.freshAt, true) + ". Konten ohne Business-Profil fehlen hier." });
+}

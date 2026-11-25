@@ -1,17 +1,17 @@
-/* Einstellungen: Skill-Einstellungen (in Make gespeichert) + App */
+/* Einstellungen in drei Gruppen: Engagement (Pause, Limits, Budget, Ruhezeiten), Listen (Kernliste, Hubs, Hashtags, No-Go, Tabu, Beispielkommentare), App (Ziel, Installieren, Zugang, Version) */
 App.register({
   id: "settings", title: "Einstellungen", order: 9, needsData: false,
   icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
-  tab: "basis", draft: null, base: null,
-  TABS: [["basis", "Basis"], ["accounts", "Accounts"], ["hashtags", "Hashtags"], ["limits", "Limits & Zeiten"], ["ziel", "Ziel & Stil"], ["app", "App"]],
-  LIMITS: [["day", "Kommentare / Tag"], ["hour", "Kommentare / Std."], ["follow_day", "Follows / Tag"], ["follow_session", "Follows / Session"], ["follow_min", "Folgen ab Followern"], ["engage_min", "Engagement ab Foll."], ["engage_max", "Engagement bis Foll."]],
+  tab: "engagement", draft: null, base: null,
+  TABS: [["engagement", "Engagement"], ["listen", "Listen"], ["app", "App"]],
+  LIMITS: [["day", "Kommentare / Tag"], ["hour", "Kommentare / Std."], ["follow_day", "Follows / Tag"], ["follow_session", "Follows / Session"], ["follow_min", "Folgen ab Followern"], ["follow_max", "Folgen bis Followern"], ["unfollow_days", "Entfolgen nach Tagen"], ["unfollow_day", "Entfolgen / Tag"], ["unfollow_session", "Entfolgen / Session"], ["engage_min", "Engagement ab Foll."], ["engage_max", "Engagement bis Foll."]],
   BUDGET: [["core", "Kernliste"], ["feed", "Startseite"], ["hubs", "Hubs"], ["hashtags", "Hashtags"]],
 
   norm(c) {
     c = JSON.parse(JSON.stringify(c || {}));
     ["nogo", "hashtags", "hubs", "friends", "watchlist", "taboo", "examples"].forEach((k) => { if (!Array.isArray(c[k])) c[k] = []; });
-    c.limits = Object.assign({ day: 20, hour: 10, follow_day: 5, follow_session: 3, follow_min: 10000, engage_min: 200, engage_max: 150000 }, c.limits);
-    c.budget = Object.assign({ core: 5, feed: 7, hubs: 5, hashtags: 3 }, c.budget);
+    c.limits = Object.assign({ day: 40, hour: 14, follow_day: 25, follow_session: 6, follow_min: 2000, follow_max: 50000, unfollow_days: 7, unfollow_day: 10, unfollow_session: 5, engage_min: 200, engage_max: 150000 }, c.limits);
+    c.budget = Object.assign({ core: 3, feed: 1, hubs: 1, hashtags: 0 }, c.budget);
     c.quiet = Object.assign({ on: true, from: "22:00", to: "07:00" }, c.quiet);
     c.goal = Object.assign({ followers: 0, date: "" }, c.goal);
     if (typeof c.fans_to_watchlist !== "boolean") c.fans_to_watchlist = true;
@@ -48,19 +48,8 @@ App.register({
     const sw = (key, on, bad) => '<label class="switch' + (bad ? " bad" : "") + '"><input type="checkbox" data-sw="' + key + '"' + (on ? " checked" : "") + "><span></span></label>";
     const numf = (path, label, v) => '<label class="field"><span>' + label + '</span><input type="number" inputmode="numeric" min="0" data-num="' + path + '" value="' + v + '"></label>';
 
-    if (me.tab === "basis") {
+    if (me.tab === "engagement") {
       html += app.card("Pause", '<div class="switchrow"><span>' + (c.paused ? '<span class="pill red">Pausiert, keine Sessions</span>' : '<span class="pill green">Aktiv, Sessions laufen</span>') + "</span>" + sw("paused", c.paused, true) + "</div>", { tip: "Ist die Pause an, startet der Skill keine Session, z. B. im Urlaub." });
-      html += app.card("No-Go-Accounts", chips("nogo", "@", "nogo") + adder("nogo", "@handle oder Profil-Link"), { tip: "Werden nie geliked, kommentiert oder gefolgt." });
-      html += app.card("Tabu-Wörter", chips("taboo", "") + adder("taboo", "z. B. mega Bild"), { tip: "Wörter, Floskeln oder Emojis, die nie in einem Kommentar landen dürfen." });
-    }
-    if (me.tab === "accounts") {
-      html += app.card("Kernliste <span class=\"pill\">" + c.friends.length + "</span>", chips("friends", "@") + adder("friends", "@handle"), { tip: "Deine 15–20 wichtigsten Leute. Jede Session wird ihr neuester Post geliked und kommentiert." });
-      html += app.card("Priority-Hubs <span class=\"pill\">" + c.hubs.length + "</span>", chips("hubs", "@") + adder("hubs", "@handle"), { tip: "Täglich besucht, aus ihren Kommentarspalten kommen die Hub-Kommentatoren." });
-    }
-    if (me.tab === "hashtags") {
-      html += app.card("Hashtags <span class=\"pill\">" + c.hashtags.length + "</span>", chips("hashtags", "#") + adder("hashtags", "#hashtag"), { tip: "Die Reihenfolge ist die Rotation. So viele, wie das Hashtag-Budget zulässt." });
-    }
-    if (me.tab === "limits") {
       html += app.card("Limits", '<div class="grid2">' + me.LIMITS.map(([k, l]) => numf("limits." + k, l, c.limits[k])).join("") + "</div>", { tip: "Sicherheitsgrenzen gegen Action-Sperren. Lieber vorsichtig erhöhen." });
       const sum = Object.values(c.budget).reduce((a, b) => a + Number(b || 0), 0);
       html += app.card("Kommentar-Budget", '<div class="grid2">' + me.BUDGET.map(([k, l]) => numf("budget." + k, l, c.budget[k])).join("") + numf("feed_repeat_days", "Startseite: Sperrfrist Tage", c.feed_repeat_days) + "</div>" +
@@ -68,11 +57,16 @@ App.register({
       html += app.card("Ruhezeiten", '<div class="switchrow"><span>' + (c.quiet.on ? "Ruhe von " + app.esc(c.quiet.from) + " bis " + app.esc(c.quiet.to) : "Keine Ruhezeiten") + "</span>" + sw("quiet.on", c.quiet.on) + "</div>" +
         '<div class="grid2" style="margin-top:12px"><label class="field"><span>Ruhe ab</span><input type="time" data-time="quiet.from" value="' + app.esc(c.quiet.from) + '"></label><label class="field"><span>Ruhe bis</span><input type="time" data-time="quiet.to" value="' + app.esc(c.quiet.to) + '"></label></div>', { tip: "In diesem Fenster startet keine Session (Schweizer Zeit)." });
     }
-    if (me.tab === "ziel") {
-      html += app.card("Follower-Ziel", '<div class="grid2">' + numf("goal.followers", "Ziel (Follower)", c.goal.followers || "") + '<label class="field"><span>Bis wann</span><input type="date" data-date="goal.date" value="' + app.esc(c.goal.date || "") + '"></label></div>', { tip: "Der Wachstum-Tab rechnet aus deinem Tempo hoch, wann du es erreichst." });
-      html += app.card("Beispielkommentare", chips("examples", "") + adder("examples", "z. B. wo stand der Van da? 😮‍💨"), { tip: "So klingst du. Der Skill nimmt sie als Vorbild für Ton und Länge, kopiert sie aber nicht." });
+    if (me.tab === "listen") {
+      html += app.card("Kernliste <span class=\"pill\">" + c.friends.length + "</span>", chips("friends", "@") + adder("friends", "@handle"), { tip: "Deine 15–20 wichtigsten Leute. Jede Session wird ihr neuester Post geliked und kommentiert." });
+      html += app.card("Priority-Hubs <span class=\"pill\">" + c.hubs.length + "</span>", chips("hubs", "@") + adder("hubs", "@handle"), { tip: "Täglich besucht, aus ihren Kommentarspalten kommen die Hub-Kommentatoren." });
+      html += app.card("Hashtags <span class=\"pill\">" + c.hashtags.length + "</span>", chips("hashtags", "#") + adder("hashtags", "#hashtag"), { tip: "Die Reihenfolge ist die Rotation. So viele, wie das Hashtag-Budget zulässt." });
+      html += app.card("No-Go-Accounts", chips("nogo", "@", "nogo") + adder("nogo", "@handle oder Profil-Link"), { tip: "Werden nie geliked, kommentiert oder gefolgt." });
+      html += app.card("Tabu-Wörter", chips("taboo", "") + adder("taboo", "z. B. mega Bild"), { tip: "Wörter, Floskeln oder Emojis, die nie in einem Kommentar landen dürfen." });
+      html += app.card("Beispielkommentare", chips("examples", "") + adder("examples", "z. B. Mega Stimmung 😍"), { tip: "So klingst du. Der Skill nimmt sie als Vorbild für Ton und Länge, kopiert sie aber nicht." });
     }
     if (me.tab === "app") {
+      html += app.card("Follower-Ziel", '<div class="grid2">' + numf("goal.followers", "Ziel (Follower)", c.goal.followers || "") + '<label class="field"><span>Bis wann</span><input type="date" data-date="goal.date" value="' + app.esc(c.goal.date || "") + '"></label></div>', { tip: "Die Übersicht rechnet aus deinem Tempo hoch, wann du es erreichst." });
       const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
       if (!standalone) html += app.card("📲 Als App installieren", '<ol class="steps"><li>In <b>Safari</b> öffnen</li><li><b>Teilen</b> <span class="kbd">⬆︎</span> antippen</li><li><b>„Zum Home-Bildschirm“</b></li></ol>');
       html += app.card("Zugang", '<label class="field"><span>Zugangscode</span><input id="code" type="password" autocomplete="off" placeholder="Code eingeben" value="' + app.esc(app.settings.code) + '"></label><button class="btn primary" id="save-code" style="margin-top:10px">Speichern & laden</button>', { tip: "Bleibt nur auf diesem Gerät." });

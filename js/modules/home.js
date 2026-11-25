@@ -1,4 +1,4 @@
-/* Übersicht: Heute, neuester Post, Woche, Netto-Follower, Follower-Ziel, Zu tun, Session, Fokus */
+/* Übersicht: Heute (mit Session, Stunde, Ziel), neuester Post, Diese Woche (mit Netto-Chart), Zu tun */
 
 /* Gemeinsame Kennzahlen (auch vom Content-Tab genutzt) */
 App.kpi = function (d) {
@@ -8,10 +8,15 @@ App.kpi = function (d) {
   const recent = ps.slice(0, 5), prev = ps.slice(5, 10);
   const rR = med(recent.map((p) => p.reach)), rP = med(prev.map((p) => p.reach));
   const f = d.stats && d.stats.followers;
-  const cap = {}; d.posts.filter((p) => !p.young && p.reach).forEach((p) => { (cap[p.captionType] = cap[p.captionType] || []).push(p); });
-  const capAvg = (k) => (cap[k] && cap[k].length ? Math.round(cap[k].reduce((s, p) => s + p.reach, 0) / cap[k].length) : null);
   return { reachRecent: rR, reachPrev: rP, reachDelta: rR != null && rP ? (rR / rP - 1) : null, signalRecent: sig(recent), signalPrev: sig(prev),
-    reachShare: rR != null && f ? rR / f : null, storyAvg: capAvg("Story"), tplAvg: capAvg("Template") };
+    reachShare: rR != null && f ? rR / f : null };
+};
+
+/* Hub-Alarm: neue Posts von Hubs und Kernliste, pro Account nur der neueste; open = noch nicht kommentiert */
+App.hubFresh = function (d) {
+  const s = d.stats, done = new Set(s ? s.activity.filter((x) => x.sc).map((x) => x.sc) : []), seen = new Set();
+  const list = (d.fresh || []).filter((x) => !seen.has(x.h) && seen.add(x.h)).map((x) => Object.assign({ done: done.has(x.sc) }, x));
+  return { list, open: list.filter((x) => !x.done).length };
 };
 
 /* 7-Tage-Fenster aus den Konto-Insights, plus Vorwoche falls komplett */
@@ -45,69 +50,57 @@ App.register({
     const week = []; for (let i = 6; i >= 0; i--) { const x = new Date(); x.setDate(x.getDate() - i); week.push({ on: commentDays.has(app.localDay(x)), wd: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][x.getDay()], today: !i }); }
 
     const gbOpen = d.contacts.filter((c) => !c.marked).length, gbQ = d.contacts.filter((c) => c.marked).length;
-    const k = App.kpi(d);
-
-    // Session auf Knopfdruck + Tagesverbrauch
-    const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows");
+    const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows"), newF = sum("new");
+    const L = cfg.limits || {}, dayCap = L.day || 40, hourCap = L.hour || 14, followCap = L.follow_day || 25;
     // Letzte Session aus dem Log (wird bei jedem Session-Ende geschrieben)
-    const lastRun = s && s.sessions.length ? s.sessions[s.sessions.length - 1] : null;
-    const stLine = lastRun ? '<span class="pill">✓ zuletzt ' + app.esc(app.fmtDate(lastRun.ts, true)) + "</span>" +
-      '<div class="muted small" style="margin-top:6px">' + (lastRun.comments || 0) + " Kommentare · " + (lastRun.likes || 0) + " Likes · " + (lastRun.follows || 0) + " Follows" + (lastRun.unfollows ? " · " + lastRun.unfollows + " entfolgt" : "") + "</div>"
-      : '<span class="muted small">Noch keine Session.</span>';
-    const L = cfg.limits || {}, dayCap = L.day || 40, hourCap = L.hour || 10, followCap = L.follow_day || 5;
+    const lastRun = s && s.sessions.length ? s.sessions[s.sessions.length - 1] : null, rounds = todaySessions.length;
+    const stLine = lastRun ? '<div class="muted small">Letzte Session ' + app.esc(app.fmtDate(lastRun.ts, true)) + ": " + (lastRun.comments || 0) + " Kommentare · " + (lastRun.likes || 0) + " Likes · " + (lastRun.follows || 0) + " Follows" + (lastRun.unfollows ? " · " + lastRun.unfollows + " entfolgt" : "") + "</div>" : '<div class="muted small">Noch keine Session.</div>';
     // Stundenbudget: Kommentare der letzten 60 Minuten (rollierend)
     const hourTs = s ? s.activity.filter((a) => a.act === "comment" && a.ts).map((a) => app.toDate(a.ts).getTime()).filter((t) => !isNaN(t) && Date.now() - t < 3600e3).sort((x, y) => x - y) : [];
     const usedH = Math.min(hourTs.length, hourCap);
-    const rounds = todaySessions.length;
     const segs = Array.from({ length: hourCap }, (_, i) => '<i class="' + (i < usedH ? "on" : "") + '" style="--i:' + i + '"></i>').join("");
-    const cSession = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
-      '<div style="margin-bottom:12px">' + stLine + "</div>" +
-      '<div class="hourbox' + (usedH >= hourCap ? " full" : "") + '">' +
-        '<div class="hb-top"><span class="stat-l">Diese Stunde</span><span class="hb-v"><b class="cu" data-to="' + usedH + '">0</b><small> / ' + hourCap + " Kommentare</small></span></div>" +
-        '<div class="segs">' + segs + "</div>" +
-        '<div class="hb-sub" id="hb-sub"></div>' +
-      "</div>" +
-      (cfg.paused ? app.note("Engagement ist pausiert (Einstellungen → Basis).") : ""), { id: "session", tip: "Start im Claude-Chat mit „Session starten“. Sicherheitsnetz: " + dayCap + " Kommentare am Tag, " + hourCap + " pro Stunde, danach nur noch Likes." });
 
-    const newF = sum("new");
-    const cToday = app.card("Heute",
+    // Follower-Ziel als schmaler Balken
+    let goalHtml = "";
+    const goal = cfg.goal || (s && s.goal) || {};
+    if (s && s.sessions.length && goal.followers) {
+      const first = s.sessions[0], lastS = s.sessions[s.sessions.length - 1], gain = lastS.followers - first.followers;
+      const perDay = gain / Math.max(1, (app.toDate(lastS.ts) - app.toDate(first.ts)) / 864e5), left = goal.followers - lastS.followers;
+      const eta = perDay > 0 ? new Date(Date.now() + Math.ceil(left / perDay) * 864e5) : null;
+      goalHtml = '<div class="goal"><div class="goal-h"><span>Ziel ' + app.num(goal.followers) + '</span><span class="muted small">' + (left <= 0 ? "erreicht 🎉" : "noch " + app.num(left) + (eta ? " · ca. " + eta.toLocaleDateString("de-CH", { month: "short", year: "numeric" }) : "")) + "</span></div>" + Charts.meter(lastS.followers, goal.followers) + "</div>";
+    }
+
+    const cToday = app.card("Heute" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + "</span>" : ""),
       '<div class="rings">' +
         Charts.ring(usedC, dayCap, "Kommentare", "var(--accent)") +
         Charts.ring(usedL, null, "Likes", "var(--sand)") +
         Charts.ring(usedF, followCap, "Gefolgt", "var(--sand)") +
       "</div>" +
       '<div class="gain' + (newF ? " pos" : "") + '"><span class="g-ic">' + (newF ? "✦" : "·") + '</span><span><b class="cu" data-to="' + newF + '">0</b> neue Follower heute</span><small>Ergebnis</small></div>' +
+      '<div class="hourbox' + (usedH >= hourCap ? " full" : "") + '">' +
+        '<div class="hb-top"><span class="stat-l">Diese Stunde</span><span class="hb-v"><b class="cu" data-to="' + usedH + '">0</b><small> / ' + hourCap + " Kommentare</small></span></div>" +
+        '<div class="segs">' + segs + '</div><div class="hb-sub" id="hb-sub"></div>' + stLine +
+      "</div>" +
       '<div class="streak"><span class="flame">' + (streak ? "🔥" : "🌫️") + '</span><div style="flex:1"><b>' + streak + "</b> " + (streak === 1 ? "Tag" : "Tage") + " Streak" +
       "<small>aktiv an " + week.filter((w) => w.on).length + " von 7 Tagen</small>" +
       '<div class="days">' + week.map((w, i) => '<span' + (w.today ? ' class="now"' : "") + "><i" + (w.on ? ' class="on"' : "") + ' style="--i:' + i + '"></i><em>' + w.wd + "</em></span>").join("") + "</div></div></div>" +
-      (d.statsError ? '<p class="note">⚠️ ' + app.esc(d.statsError) + "</p>" : ""));
+      goalHtml +
+      (cfg.paused ? app.note("Engagement ist pausiert (Einstellungen → Engagement).") : "") +
+      (d.statsError ? '<p class="note">⚠️ ' + app.esc(d.statsError) + "</p>" : ""),
+      { tip: "Start im Claude-Chat mit „Session starten“. Sicherheitsnetz: " + dayCap + " Kommentare am Tag, " + hourCap + " pro Stunde, danach nur noch Likes. Ziel-Prognose aus dem bisherigen Tempo." });
 
     // Zu tun
+    const hf = App.hubFresh(d);
     const cTodo = app.card("Zu tun",
       '<div class="todo">' +
         '<a href="#" data-go="content" data-anchor="open"><div><div class="t-l">Unbeantwortet</div><div class="t-s">Kommentare unter deinen Posts</div></div><span class="badge' + (d.openComments.length ? " hot" : "") + '">' + d.openComments.length + "</span></a>" +
         '<a href="#" data-go="contacts"><div><div class="t-l">Gegenbesuch</div><div class="t-s">' + (gbQ ? gbQ + " vorgemerkt" : "warten auf Like + Kommentar") + '</div></div><span class="badge' + (gbOpen ? " hot" : "") + '">' + gbOpen + "</span></a>" +
+        (d.freshAt ? '<a href="#" data-go="contacts" data-anchor="hubs"><div><div class="t-l">Neu bei Hubs & Kernliste</div><div class="t-s">Posts der letzten 26 Stunden</div></div><span class="badge' + (hf.open ? " hot" : "") + '">' + hf.open + "</span></a>" : "") +
       "</div>");
-
-    // Hub-Alarm: neue Posts von Hubs und Kernliste, pro Account nur der neueste
-    const done = new Set(s ? s.activity.filter((x) => x.sc).map((x) => x.sc) : []), seenH = new Set();
-    const fresh = (d.fresh || []).filter((x) => !seenH.has(x.h) && seenH.add(x.h));
-    const openF = fresh.filter((x) => !done.has(x.sc));
-    const cFresh = d.freshAt ? app.card("Neu bei Hubs & Kernliste <span class=\"pill" + (openF.length ? " accent" : "") + "\">" + openF.length + "</span>",
-      fresh.length ? app.more(fresh.map((x) => '<li><a href="' + app.esc(x.link) + '" target="_blank" rel="noopener"><b>@' + app.esc(x.h) + "</b></a>" +
-        '<span class="muted">' + (x.hub ? "Hub" : "Kernliste") + " · " + app.esc(app.rel(x.ts)) + "</span>" +
-        '<span class="right">' + (done.has(x.sc) ? '<span class="pill green">✓ kommentiert</span>' : '<span class="pill">offen</span>') + "</span></li>")) : '<p class="muted">Keine neuen Posts in den letzten 26 Stunden.</p>',
-      { tip: "Make prüft täglich um 18:45 alle Hubs und die Kernliste. Die nächste Session arbeitet diese Liste zuerst ab. Stand: " + app.fmtDate(d.freshAt, true) + ". Konten ohne Business-Profil fehlen hier." }) : "";
-
-    // Fokus diese Woche
-    const adv = [];
-    if (k.storyAvg && k.tplAvg) adv.push(k.storyAvg > k.tplAvg * 1.15 ? "Posts mit Story-Caption erreichen im Schnitt <b>" + app.num(k.storyAvg) + "</b> Konten, mit Template-Caption <b>" + app.num(k.tplAvg) + "</b>. Teste die nächsten 3 Posts mit einer kleinen Geschichte statt dem Standard-Block." : "Story- und Template-Captions liegen bei der Reichweite nah beieinander. Die Caption ist gerade nicht der größte Hebel.");
-    if (k.signalRecent != null) adv.push(k.signalRecent < 10 ? "Auf 1.000 erreichte Konten kommen nur <b>" + app.d1(k.signalRecent) + "</b> Saves und Shares. Posts, die man speichert oder weiterschickt (Spot-Infos, Anfahrt, beste Uhrzeit, Ausrüstung), heben diesen Wert am stärksten." : "Saves und Shares liegen bei <b>" + app.d1(k.signalRecent) + "</b> pro 1.000 Reichweite. Mehr Posts in dieser Art machen.");
-    if (k.reachShare != null && k.reachShare < 0.1) adv.push("Nur <b>" + app.pct(k.reachShare) + "</b> deiner Follower sehen einen Post. Reels sind der Weg zu Leuten, die dir noch nicht folgen.");
-    const cFocus = adv.length ? app.card("Fokus diese Woche", '<p class="advice1">' + adv[0] + "</p>") : "";
 
     let cWeek = "";
     const W = App.week(d);
+    const netDays = d.insights.filter((x) => x.follows != null || x.unfollows != null);
     if (W) {
       const cmp = (a, b, signed) => (b == null ? "" : a == null ? "" : (() => { const df = a - b; return '<span class="' + (df >= 0 ? "up" : "down") + '">' + (df >= 0 ? "▲ " : "▼ ") + (signed ? app.num(Math.abs(df)) : (b ? Math.abs(Math.round((df / b) * 100)) + " %" : "–")) + "</span> vs. Vorwoche"; })());
       const c = W.cur, pv = W.prev;
@@ -117,8 +110,9 @@ App.register({
           app.stat("Reichweite organisch", app.num(c.reachOrg), pv ? cmp(c.reachOrg, pv.reachOrg) : "Ø " + app.num(Math.round(c.reachOrg / c.n)) + " pro Tag") +
           app.stat("Interaktionen", app.num(c.inter), pv ? cmp(c.inter, pv.inter) : "") +
           app.stat("Profilaufrufe", c.pvDays ? app.num(c.pv) : "–", c.pvDays ? (pv && pv.pvDays === 7 ? cmp(c.pv, pv.pv) : c.pvDays < c.n ? "seit " + app.fmtDate(c.pvFrom) : "") : "ab morgen") +
-        "</div>" + (pv ? "" : app.note("Vergleich mit der Vorwoche ab " + app.fmtDate(W.fullFrom) + ", vorher fehlen die Daten.")),
-        { tip: "Summe der letzten 7 Tage mit Daten. Netto = neue Follower minus Unfollows. Organisch = ohne Reichweite aus Werbung. Reichweite ist die Summe der Tageswerte, dieselbe Person kann an mehreren Tagen zählen." });
+        "</div>" + (netDays.length ? '<h4 class="sub">Netto-Follower pro Tag</h4><div class="chart-box" id="ch-net"></div>' : "") +
+        (pv ? "" : app.note("Vergleich mit der Vorwoche ab " + app.fmtDate(W.fullFrom) + ", vorher fehlen die Daten.")),
+        { tip: "Summe der letzten 7 Tage mit Daten. Netto = neue Follower minus Unfollows, direkt von Instagram, zählt alles (auch Reels, Stories, Werbung). Organisch = ohne Reichweite aus Werbung." });
     }
 
     const p = d.posts[0];
@@ -126,31 +120,8 @@ App.register({
       '<a class="post-hero" href="' + app.esc(p.link) + '" target="_blank" rel="noopener"><div class="post-meta"><span class="tag">' + p.format + "</span> " + app.fmtDate(p.ts, true) + "</div>" +
       '<div class="post-cap">' + app.esc(p.caption.split("\n")[0] || "Ohne Caption") + "</div>" +
       '<div class="stats mini">' + app.stat("Reichw.", app.num(p.reach)) + app.stat("Likes", app.num(p.likes)) + app.stat("Komm.", app.num(p.comments)) + app.stat("Saves", app.num(p.saves)) + app.stat("Shares", app.num(p.shares)) + "</div></a>") : "";
-    // Netto-Follower pro Tag (direkt von Instagram)
-    const netDays = d.insights.filter((x) => x.follows != null || x.unfollows != null);
-    const net = netDays.reduce((a, x) => a + (x.follows || 0) - (x.unfollows || 0), 0);
-    const cNet = netDays.length ? app.card("Netto-Follower pro Tag <span class=\"pill " + (net >= 0 ? "green" : "red") + "\">" + app.signed(net) + "</span>", '<div class="chart-box" id="ch-net"></div>',
-      { tip: "Neue Follower minus Unfollows pro Tag, direkt von Instagram. Zählt alles, auch Follows über Reels, Stories und Werbung, nicht nur über das Skript." }) : "";
 
-    // Follower-Ziel mit Prognose
-    let cGoal = "";
-    const goal = cfg.goal || (s && s.goal) || {};
-    if (s && s.sessions.length && goal.followers) {
-      const first = s.sessions[0], lastS = s.sessions[s.sessions.length - 1], gain = lastS.followers - first.followers;
-      const spanDays = Math.max(1, (app.toDate(lastS.ts) - app.toDate(first.ts)) / 864e5);
-      const perDay = gain / spanDays, left = goal.followers - lastS.followers;
-      const eta = perDay > 0 ? Math.ceil(left / perDay) : null;
-      const etaDate = eta != null ? new Date(Date.now() + eta * 864e5) : null;
-      const onTrack = goal.date && etaDate ? etaDate <= new Date(goal.date) : null;
-      cGoal = app.card("Follower-Ziel",
-        '<div class="stats">' + app.stat("Ziel", app.num(goal.followers), goal.date ? "bis " + app.fmtDate(goal.date) : "") +
-        app.stat("Noch", app.num(Math.max(0, left)), app.d1(perDay) + " pro Tag") + "</div>" +
-        '<div style="margin-top:10px">' + Charts.meter(lastS.followers, goal.followers) + "</div>" +
-        app.note(left <= 0 ? "Ziel erreicht 🎉" : eta == null ? "Beim aktuellen Tempo nicht absehbar." : "Beim aktuellen Tempo erreicht am " + etaDate.toLocaleDateString("de-CH") + (onTrack == null ? "." : onTrack ? ", also rechtzeitig." : ", also später als geplant.")));
-    }
-
-    // Reihenfolge: Heute, neuester Post, Woche, Netto, Ziel, dann Aufgaben, dann Technik
-    el.innerHTML = cToday + cPost + cWeek + cNet + cGoal + cTodo + cFresh + cSession + cFocus;
+    el.innerHTML = cToday + cPost + cWeek + cTodo;
     const netBox = el.querySelector("#ch-net");
     if (netBox) Charts.diverge(netBox, netDays.map((x) => ({ x: app.fmtDate(x.day), v: (x.follows || 0) - (x.unfollows || 0), tip: "<b>" + app.fmtDate(x.day) + "</b><br>+" + app.num(x.follows || 0) + " neu · −" + app.num(x.unfollows || 0) + " weg" })));
     el.querySelectorAll(".cu").forEach((x, i) => setTimeout(() => app.countUp(x, Number(x.dataset.to)), 150 + i * 70));

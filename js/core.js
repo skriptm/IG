@@ -117,14 +117,14 @@
       const p = kv(x.parts);
       if (x.metric === "reach" && x.breakdown === "follow_type") { d.reach = x.total; d.reachFollower = p.FOLLOWER || 0; d.reachNon = p.NON_FOLLOWER || 0; }
       else if (x.metric === "reach" && x.breakdown === "media_product_type") {
-        d.reachByFormat = p; d.reachAd = p.AD || 0; d.reachReel = p.REEL || 0; d.reachStory = p.STORY || 0;
+        d.reachAd = p.AD || 0;
         d.reachOrganic = (p.CAROUSEL_CONTAINER || 0) + (p.POST || 0) + (p.REEL || 0) + (p.STORY || 0) + (p.IGTV || 0);
         if (d.reach == null) d.reach = x.total;
       }
-      else if (x.metric === "follows_and_unfollows" && x.parts) { d.follows = p.FOLLOWER || 0; d.unfollows = p.NON_FOLLOWER || 0; d.net = d.follows - d.unfollows; }
-      else if (x.metric === "totals" || /_totals$/.test(r.key || "")) { Object.assign(d, { engaged: p.accounts_engaged, linkTaps: p.profile_links_taps, interactions: p.total_interactions, saves: p.saves, shares: p.shares, profileViews: p.profile_views }); }
+      else if (x.metric === "follows_and_unfollows" && x.parts) { d.follows = p.FOLLOWER || 0; d.unfollows = p.NON_FOLLOWER || 0; }
+      else if (x.metric === "totals" || /_totals$/.test(r.key || "")) { Object.assign(d, { interactions: p.total_interactions, profileViews: p.profile_views }); }
     });
-    const insights = Object.values(days).map((d) => Object.assign(d, { adPct: d.reach && d.reachAd != null ? d.reachAd / d.reach : null })).sort((a, b) => (a.day < b.day ? -1 : 1));
+    const insights = Object.values(days).sort((a, b) => (a.day < b.day ? -1 : 1));
 
     const contacts = (raw.gb || []).map((r) => Object.assign({ key: r.key }, r.data || r)).filter((c) => c.h && !noGo.has(String(c.h).toLowerCase()))
       .map((c) => ({ h: c.h, ts: c.ts, src: c.src, text: dec(c.text), media: c.media, q: c.q && String(c.q).trim() ? String(c.q) : "", replied: repliedBy.has(c.h) }))

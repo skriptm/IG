@@ -297,3 +297,4 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: rgba(va
 .chip.conv { border-color: rgba(var(--accent-rgb),.5); color: var(--accent-l); }
 .subs-form select { padding: 10px 12px; font: inherit; }
 .list.subs .right { display: flex; gap: 4px; align-items: center; }
+.list .right.red { color: var(--red); }

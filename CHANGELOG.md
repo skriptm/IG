@@ -25,13 +25,19 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Make-Szenarien (Team 1047609)
 - IG App API (10161848): Webhook für die App. Aktionen: all, mark, del, reply, stats, cfg_get, cfg_set, refresh, sess_get, prep, log. `all`, `stats`, `cfg_get`, `sess_get` nutzt die App seit v1.12.0 nicht mehr.
-- IG App Init (10171545): eigener Webhook (Hook 4517389), liefert Posts, Insights, Gegenbesuch, Statistik, Einstellungen und Session in einem Aufruf. 14 Operationen statt 20.
+- IG App Init (10171545): eigener Webhook (Hook 4517389), liefert Posts, Insights, Gegenbesuch, Statistik, Einstellungen und Credit-Verbrauch (`usage`) in einem Aufruf. 14 Operationen statt 20.
 - IG Growth – Konto-Insights sammeln (10149108): täglich 23:40, Data Store 208884. Enthält seit 15.11. auch profile_views.
 - IG Growth – Posts & Kommentare sammeln (10139638): täglich 06:10, die 5 neuesten Posts, Data Store 208242.
 - IG Hub-Alarm (10170662): täglich 18:45, Datensatz `fresh` im Data Store 208242.
 - IG Auto-Reply (2841603, ohne Mails seit 25.11.), IG Offene Kommentare beantworten (10149203).
 
 ## Verlauf
+
+### 25.11.2026 – v1.18.0 (Betrieb: Credits und was wo läuft)
+- Einstellungen → neuer Reiter **Betrieb**: Make-Credits (verbraucht, übrig, Schnitt pro Tag, erlaubt pro Tag bis Reset, Hochrechnung, „reicht“ oder „reicht nicht“), Liste „Läuft über Make“ mit Credits pro Szenario, Liste „Läuft ohne Make“ (Auto-Reply per Apps Script, Sessions im Browser).
+- Liste der Szenarien steht in `CONFIG.runs` und `CONFIG.ownRuns` (config.js).
+- Make: Init liefert statt `session` (von der App nicht mehr gelesen) jetzt `usage` aus dem Data Store 209784, weiterhin 14 Credits.
+- Offen: Szenario „IG Credits“ (täglich 23:55, ca. 3 Credits) schreibt `usage`. Braucht zuerst eine Make-API-Verbindung, die André anlegt.
 
 ### 25.11.2026 – Make-Credits sparen (App unverändert, v1.17.0)
 - Credit-Reset ist am 12.12. (nicht 01.12.). Stand 25.11.: 5.438 Credits übrig, Ziel ≤ 320 pro Tag.

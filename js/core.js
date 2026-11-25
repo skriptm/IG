@@ -145,7 +145,14 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, demo, fresh, freshAt, contacts, stats, cfg, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    let usage = null;
+    const u = raw.usage;
+    if (u && +u.limit) {
+      const ids = String(u.ids || "").split(","), ops = String(u.ops || "").split(",");
+      usage = { ts: u.ts, used: +u.used || 0, limit: +u.limit, reset: u.reset, last: u.last,
+        sc: ids.map((id, i) => ({ id: +id, ops: +ops[i] || 0 })).filter((x) => x.id).sort((a, b) => b.ops - a.ops) };
+    }
+    return { posts, insights, demo, fresh, freshAt, contacts, stats, cfg, usage, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }

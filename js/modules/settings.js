@@ -1,9 +1,9 @@
-/* Einstellungen in drei Gruppen: Engagement (Pause, Limits, Budget, Ruhezeiten), Listen (Kernliste, Hubs, Hashtags, No-Go, Tabu, Beispielkommentare), App (Ziel, Installieren, Zugang, Version) */
+/* Einstellungen in vier Gruppen: Engagement (Pause, Limits, Budget, Ruhezeiten), Listen (Kernliste, Hubs, Hashtags, No-Go, Tabu, Beispielkommentare), Betrieb (Make-Credits, was wo läuft), App (Ziel, Installieren, Zugang, Version) */
 App.register({
   id: "settings", title: "Einstellungen", order: 9, needsData: false,
   icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   tab: "engagement", draft: null, base: null,
-  TABS: [["engagement", "Engagement"], ["listen", "Listen"], ["app", "App"]],
+  TABS: [["engagement", "Engagement"], ["listen", "Listen"], ["betrieb", "Betrieb"], ["app", "App"]],
   LIMITS: [["day", "Kommentare / Tag"], ["hour", "Kommentare / Std."], ["follow_day", "Follows / Tag"], ["follow_session", "Follows / Session"], ["follow_min", "Folgen ab Followern"], ["follow_max", "Folgen bis Followern"], ["following_max", "Gefolgt höchstens"], ["unfollow_days", "Entfolgen nach Tagen"], ["unfollow_day", "Entfolgen / Tag"], ["unfollow_session", "Entfolgen / Session"], ["engage_min", "Engagement ab Foll."], ["engage_max", "Engagement bis Foll."]],
   BUDGET: [["core", "Kernliste"], ["feed", "Startseite"], ["hubs", "Hubs"], ["hashtags", "Hashtags"]],
 
@@ -38,7 +38,7 @@ App.register({
     const changed = () => { app.editing = me.dirty(); me.pane(el, d, app); };
     let html = "";
 
-    if (me.tab !== "app" && !c) {
+    if (me.tab !== "app" && me.tab !== "betrieb" && !c) {
       pane.innerHTML = app.card("Einstellungen", '<p class="muted">' + (d && d.cfgError ? app.esc(d.cfgError) : "Werden geladen …") + "</p>");
       me.bar(el, app); return;
     }
@@ -65,6 +65,7 @@ App.register({
       html += app.card("Tabu-Wörter", chips("taboo", "") + adder("taboo", "z. B. mega Bild"), { tip: "Wörter, Floskeln oder Emojis, die nie in einem Kommentar landen dürfen." });
       html += app.card("Beispielkommentare", chips("examples", "") + adder("examples", "z. B. Mega Stimmung 😍"), { tip: "So klingst du. Der Skill nimmt sie als Vorbild für Ton und Länge, kopiert sie aber nicht." });
     }
+    if (me.tab === "betrieb") html += me.betrieb(d, app);
     if (me.tab === "app") {
       html += app.card("Follower-Ziel", '<div class="grid2">' + numf("goal.followers", "Ziel (Follower)", c.goal.followers || "") + '<label class="field"><span>Bis wann</span><input type="date" data-date="goal.date" value="' + app.esc(c.goal.date || "") + '"></label></div>', { tip: "Die Übersicht rechnet aus deinem Tempo hoch, wann du es erreichst." });
       const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
@@ -109,6 +110,27 @@ App.register({
       pane.querySelector("#reset").onclick = () => { if (confirm("Zwischengespeicherte Daten löschen? Der Zugangscode bleibt.")) { app.LS.del("cache"); app.data = null; app.load(true); } };
     }
     me.bar(el, app);
+  },
+
+  betrieb(d, app) {
+    const u = d && d.usage, DAY = 864e5, now = Date.now(), row = (a, b, cls) => "<li><span>" + a + '</span><span class="right ' + (cls || "muted") + '">' + b + "</span></li>";
+    let html;
+    if (!u) html = app.card("Make-Credits", '<p class="muted">Noch keine Zahlen. Kommen nach dem ersten Nachtlauf.</p>');
+    else {
+      const left = Math.max(0, u.limit - u.used), since = Math.max(1, (now - new Date(u.last)) / DAY), rest = Math.max(1, (new Date(u.reset) - now) / DAY),
+        avg = Math.round(u.used / since), allow = Math.floor(left / rest), end = Math.round(u.used + avg * rest), ok = end <= u.limit,
+        day = (x) => new Date(x).toLocaleDateString("de-CH", { day: "numeric", month: "numeric" });
+      html = app.card("Make-Credits " + (ok ? '<span class="pill green">reicht</span>' : '<span class="pill red">reicht nicht</span>'),
+        '<div class="goal"><div class="goal-h"><span>' + app.num(u.used) + " von " + app.num(u.limit) + '</span><span class="muted small">Reset ' + day(u.reset) + "</span></div>" + Charts.meter(u.used, u.limit) + "</div>" +
+        '<ul class="list">' + row("Übrig", app.num(left)) + row("Schnitt pro Tag", app.num(avg)) + row("Erlaubt pro Tag bis Reset", app.num(allow), avg > allow ? "red" : "muted") +
+        row("Hochrechnung bis Reset", app.num(end), ok ? "muted" : "red") + row("Stand", app.esc(app.rel(u.ts))) + "</ul>");
+    }
+    const names = new Map(CONFIG.runs.map((r) => [r.id, r])), sc = u ? u.sc : [], seen = new Set(sc.map((x) => x.id));
+    const make = sc.map((x) => { const r = names.get(x.id); return row((r ? app.esc(r.name) : "Szenario " + x.id) + (r ? '<br><span class="muted small">' + app.esc(r.when) + "</span>" : ""), app.num(x.ops)); })
+      .concat(CONFIG.runs.filter((r) => !seen.has(r.id)).map((r) => row(app.esc(r.name) + '<br><span class="muted small">' + app.esc(r.when) + "</span>", u ? "0" : "–")));
+    html += app.card("Läuft über Make", '<ul class="list">' + make.join("") + "</ul>", { tip: "Credits seit dem letzten Reset, pro Szenario." });
+    html += app.card("Läuft ohne Make", '<ul class="list">' + CONFIG.ownRuns.map((r) => row(app.esc(r.name) + '<br><span class="muted small">' + app.esc(r.when) + "</span>", '<span class="pill">' + app.esc(r.where) + "</span>")).join("") + "</ul>", { tip: "Kostet keine Make-Credits." });
+    return html;
   },
 
   bar(el, app) {

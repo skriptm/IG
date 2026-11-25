@@ -112,6 +112,7 @@ details.more[open] summary { display: none; }
 .btn:active { transform: scale(.97); }
 .btn.primary { background: var(--accent); border-color: transparent; color: #fff; box-shadow: 0 6px 22px rgba(var(--accent-rgb),.28); }
 .btn.small { width: auto; padding: 8px 12px; font-size: 13px; }
+.btn.ghost { background: none; border-color: transparent; color: var(--muted); margin-left: 4px; }
 .btn.danger { color: #ffb3a8; }
 .btn:disabled { opacity: .5; box-shadow: none; }
 .btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }

@@ -33,6 +33,10 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – v1.15.3 (Kommentare ausblenden, aktuelle Session-Zeile)
+- Content, „Unbeantwortet“: ✕ blendet einen offenen Kommentar aus (nur in der App, gespeichert auf dem Gerät unter `chide`; bei Instagram bleibt er). Zählt auch in „Zu tun“ nicht mehr mit. Neu im Kern: `App.hideComment()`.
+- Übersicht, „Engagement-Session“: Statuszeile kommt aus der letzten geloggten Session (`stats.sessions`) statt aus dem Make-Record `session`, den der Skill seit V4 nicht mehr schreibt (zeigte noch den 15.11.). Code für `session`/„läuft“ gelöscht.
+
 ### 25.11.2026 – Engagement-Helfer v7 und Skill V6 (App unverändert, v1.15.2)
 - Make, Data Store 209784, Record `helpers` (Helfer-Version `hv` 7): `p` liest Follower, Gefolgt, Beiträge und liefert `ratio`/`rok` (Gefolgt mindestens 25 % der Follower). Neuer Helfer `c`: Vorfilter für 20 bis 30 Handles über Instagram-Daten ohne Profilbesuch (Follower-Spanne, Beiträge, Verhältnis, Post-Alter, Likes, privat, folgt schon), Ergebnis in `localStorage.cr`. `h`: Kommentar nach Bildtyp (Licht, Nebel, Berge, Wald, Nacht, Wasser, sonst Pool), Bug „own“ behoben (Autor aus Post-Meta statt Seitentext). `e`: wartet auf das Profil, schließt den Dialog wieder, Ergebnis auch in `localStorage.el`.
 - Getestet mit Beispieldaten (21 Tests, u. a. @wander.nine, @oneshot__photo, @tommytoro). Alter Helfer-Code als Backup gesichert (nicht im Repo).

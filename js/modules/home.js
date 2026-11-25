@@ -49,17 +49,16 @@ App.register({
 
     // Session auf Knopfdruck + Tagesverbrauch
     const usedC = sum("comments"), usedL = sum("likes"), usedF = sum("follows");
-    const ss = d.session || {}, st = ss.status || "";
-    const running = st === "läuft" && app.daysAgo(ss.at) === 0 && (Date.now() - new Date(String(ss.at).replace(" ", "T"))) < 90 * 60e3;
-    const stLine = running ? '<span class="pill green">● läuft seit ' + app.esc(String(ss.at || "").slice(11)) + "</span>"
-      : st === "fertig" ? '<span class="pill">✓ zuletzt fertig ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
-      : st === "fehler" ? '<span class="pill red">Fehler ' + app.esc(app.fmtDate(ss.at, true)) + "</span>" + (ss.summary ? '<div class="muted small" style="margin-top:6px">' + app.esc(ss.summary) + "</div>" : "")
-      : '<span class="muted small">Heute noch keine Session.</span>';
+    // Letzte Session aus dem Log (wird bei jedem Session-Ende geschrieben)
+    const lastRun = s && s.sessions.length ? s.sessions[s.sessions.length - 1] : null;
+    const stLine = lastRun ? '<span class="pill">✓ zuletzt ' + app.esc(app.fmtDate(lastRun.ts, true)) + "</span>" +
+      '<div class="muted small" style="margin-top:6px">' + (lastRun.comments || 0) + " Kommentare · " + (lastRun.likes || 0) + " Likes · " + (lastRun.follows || 0) + " Follows" + (lastRun.unfollows ? " · " + lastRun.unfollows + " entfolgt" : "") + "</div>"
+      : '<span class="muted small">Noch keine Session.</span>';
     const L = cfg.limits || {}, dayCap = L.day || 40, hourCap = L.hour || 10, followCap = L.follow_day || 5;
     // Stundenbudget: Kommentare der letzten 60 Minuten (rollierend)
     const hourTs = s ? s.activity.filter((a) => a.act === "comment" && a.ts).map((a) => app.toDate(a.ts).getTime()).filter((t) => !isNaN(t) && Date.now() - t < 3600e3).sort((x, y) => x - y) : [];
     const usedH = Math.min(hourTs.length, hourCap);
-    const rounds = todaySessions.length + (running ? 1 : 0);
+    const rounds = todaySessions.length;
     const segs = Array.from({ length: hourCap }, (_, i) => '<i class="' + (i < usedH ? "on" : "") + '" style="--i:' + i + '"></i>').join("");
     const cSession = app.card("Engagement-Session" + (rounds ? ' <span class="pill accent rounds">' + rounds + (rounds === 1 ? " Runde" : " Runden") + " heute</span>" : ""),
       '<div style="margin-bottom:12px">' + stLine + "</div>" +

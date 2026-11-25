@@ -102,7 +102,8 @@
     const allComments = [];
     posts.forEach((p) => p.commentList.forEach((c) => { if (c.h && !OWN.includes(c.h) && !isSpam(c.text)) allComments.push(Object.assign({ link: p.link, sc: p.sc, fresh: p.fresh }, c)); }));
     allComments.sort((a, b) => (a.ts < b.ts ? 1 : -1));
-    const openComments = allComments.filter((c) => c.fresh && !c.replies);
+    const hidden = new Set(LS.get("chide", []));
+    const openComments = allComments.filter((c) => c.fresh && !c.replies && !hidden.has(c.id));
     const repliedBy = new Set(allComments.filter((c) => c.replies > 0).map((c) => c.h));
 
     const days = {}, demo = {};
@@ -144,7 +145,7 @@
         newFollowers: (s.followers_recent || []).filter((f) => !f.baseline)
       };
     }
-    return { posts, insights, demo, fresh, freshAt, contacts, stats, cfg, session: raw.session || {}, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
+    return { posts, insights, demo, fresh, freshAt, contacts, stats, cfg, cfgUpdated: raw.cfgUpdated || null, allComments, openComments,
       fetched: raw.ts || new Date().toISOString(), igFetched: lastRun ? new Date(lastRun).toISOString() : null,
       statsError: raw.statsError || null, cfgError: raw.cfgError || null };
   }
@@ -183,7 +184,6 @@
         const raw = await call({ a: "init" });
         if (!(raw.stats && raw.stats.sessions)) { raw.statsError = "Noch keine Statistik"; delete raw.stats; }
         if (!(raw.cfg && typeof raw.cfg === "object" && Object.keys(raw.cfg).length)) { raw.cfgError = "Einstellungen nicht erreichbar"; const old = LS.get("cache", null); raw.cfg = old && old.cfg ? old.cfg : null; }
-        raw.session = raw.session || {};
         LS.set("cache", raw);
         this.data = normalize(raw);
         if (deep) this.toast("Aktuell ✓");
@@ -191,6 +191,13 @@
         if (e.code === 403) { this.toast("Zugangscode falsch", "bad"); this.go("settings"); }
         else this.toast(navigator.onLine ? "Laden fehlgeschlagen: " + e.message : "Offline – zeige letzte Daten", "bad");
       } finally { this.busy = false; btn.classList.remove("spin"); this.renderHero(); if (!this.editing) this.render(); }
+    },
+
+    /* Offenen Kommentar ausblenden (nur in der App, auf diesem Gerät; bei Instagram bleibt er stehen) */
+    hideComment(id) {
+      const list = LS.get("chide", []); if (!list.includes(id)) list.push(id); LS.set("chide", list.slice(-300));
+      if (this.data) this.data.openComments = this.data.openComments.filter((c) => c.id !== id);
+      this.render();
     },
 
     /* Einstellungen des Skills speichern */

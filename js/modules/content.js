@@ -19,8 +19,8 @@ App.register({
     html += app.card("Unbeantwortet <span class=\"pill" + (d.openComments.length ? " accent" : "") + "\">" + d.openComments.length + "</span>",
       '<button class="btn primary" id="reply-btn" style="margin-bottom:10px">💬 Offene Kommentare jetzt beantworten</button>' +
       (d.openComments.length ? '<ul class="list comments">' + d.openComments.map((c) =>
-        '<li><div style="flex:1;min-width:0">' + app.userLink(c.h) + ' <span class="muted small">' + app.esc(app.rel(c.ts)) + '</span><div class="ctext">' + app.esc(c.text) + '</div></div><a class="btn small" href="' + app.esc(c.link) + '" target="_blank" rel="noopener">Post</a></li>').join("") + "</ul>"
-        : '<p class="muted">Alles beantwortet 🙂</p>'), { id: "open", tip: "Claude antwortet unter deinen letzten 12 Posts, Fragen gehen per Mail an dich. Eigene Accounts und Spam sind ausgeblendet. Mit ↻ oben fragst du Instagram neu ab." });
+        '<li><div style="flex:1;min-width:0">' + app.userLink(c.h) + ' <span class="muted small">' + app.esc(app.rel(c.ts)) + '</span><div class="ctext">' + app.esc(c.text) + '</div></div><a class="btn small" href="' + app.esc(c.link) + '" target="_blank" rel="noopener">Post</a><button class="btn small ghost hide-c" data-id="' + app.esc(c.id) + '" aria-label="Ausblenden">✕</button></li>').join("") + "</ul>"
+        : '<p class="muted">Alles beantwortet 🙂</p>'), { id: "open", tip: "Claude antwortet unter deinen letzten 12 Posts, Fragen gehen per Mail an dich. Eigene Accounts und Spam sind ausgeblendet. ✕ blendet einen Kommentar hier aus (bei Instagram bleibt er stehen). Mit ↻ oben fragst du Instagram neu ab." });
 
     html += app.card("Reichweite pro Tag", '<div class="legend"><i style="background:var(--sand)"></i>Follower <i style="background:var(--accent)"></i>Nicht-Follower <i style="background:#5a5550"></i>Werbung</div><div class="chart-box" id="ch-reach"></div>');
     html += funnelCard(d, app);
@@ -98,6 +98,7 @@ App.register({
     };
     draw();
     el.querySelector("#seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; me.state.sort = b.dataset.k; el.querySelectorAll("#seg button").forEach((x) => x.classList.toggle("on", x === b)); draw(); });
+    el.querySelectorAll(".hide-c").forEach((b) => (b.onclick = () => app.hideComment(b.dataset.id)));
     el.querySelector("#reply-btn").onclick = async (e) => {
       if (!confirm("Offene Kommentare unter den letzten 12 Posts jetzt per KI beantworten?")) return;
       const b = e.currentTarget; b.disabled = true; b.textContent = "Läuft …";

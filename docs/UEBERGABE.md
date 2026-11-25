@@ -6,7 +6,7 @@ Zuerst `CHANGELOG.md` lesen (Verlauf, bewusste Entscheidungen). Diese Datei list
 - **App (PWA):** dieses Repo, live auf GitHub Pages, aktuell v1.18.0. Reiter: Übersicht, Follower, Content, Kontakte, Einstellungen.
 - **Make (Team 1047609):** IG App API 10161848 (prep/log/init-Routen), App Init 10171545, Auto-Reply 2841603 (ohne Mails seit 25.11.), Posts 06:10, Insights 23:40, Hub-Alarm 18:45, Button 10149203. Data Stores: 209784 Einstellungen (`main`, `stats`, `helpers` = Browser-Helfer v7, Logs), 209450 Gegenbesuch, 208242 Posts, 208884 Insights.
 - **Skill `instagram-comment-helper`:** V8 (gespeichert am 25.11.). Start nur manuell, Windows-Rechner.
-- **Auto-Reply neu:** `automation/ig-autoreply.gs` als Google-Apps-Script-Projekt „IG Auto-Reply“ (script.google.com), Modus `draft`, Zeitplan alle 5 Minuten. Protokoll: Google Sheet „IG Auto-Reply Protokoll“. Meta-App „lauinger-hub“ (Systemnutzer-Token, läuft nicht ab), Claude-Schlüssel „ig-autoreply“ mit 5-$-Monatslimit.
+- **Auto-Reply neu:** `automation/ig-autoreply.gs` als Google-Apps-Script-Projekt „IG Auto-Reply“ (script.google.com), Modus `draft` (`live`, `aus` = Not-Aus), höchstens 25 Antworten pro Tag, Zeitplan alle 5 Minuten. André muss den Code vom 25.11. (v1.18.1) vor dem 28.11. neu einfügen. Protokoll: Google Sheet „IG Auto-Reply Protokoll“. Meta-App „lauinger-hub“ (Systemnutzer-Token, läuft nicht ab), Claude-Schlüssel „ig-autoreply“ mit 5-$-Monatslimit.
 
 ## Offen, in dieser Reihenfolge
 1. **Auto-Reply Parallellauf (bis 28.11.):** Entwürfe im Sheet mit den Make-Antworten vergleichen. Dann:
@@ -19,6 +19,9 @@ Zuerst `CHANGELOG.md` lesen (Verlauf, bewusste Entscheidungen). Diese Datei list
 6. **Caption-Generator** (Text und Foto) über Google Apps Script, gleiche Schlüssel-Lösung wie der Auto-Reply. Plus Hashtag-Sets aus den eigenen Reichweiten-Daten in der App.
 7. **Google Doc „IG App – Änderungsprotokoll“** im Drive-Ordner „Instagram Growth“ nachziehen (seit v1.12.0 nicht aktualisiert).
 8. **Hub-Kandidaten:** @lensloves_folkscenery, @norgesfotografer, @your_coasts (André prüft: aktiv, Kommentare, Business-Konto). Hub-Liste aktuell: folkscenery, visualgroundmag, moods_in_frame, stayandwander, raw_landscape__, depths.of.earth, moodygrams.
+
+## Notfall „Stop“
+André schreibt „Stop“: alle Make-Szenarien mit Zeitplan deaktivieren (nicht löschen), in `main` `paused: true` setzen. André stellt im Apps Script `MODE` auf `aus`. Wieder starten genauso rückwärts.
 
 ## Zu beobachten
 - Erste Sessions mit Skill V8: Profile geprüft pro Follow, `rate` im Vorfilter, Gegenbesuch-Liste wird kürzer, Gefolgt-Zahl gegen Obergrenze 1.500.

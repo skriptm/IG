@@ -33,6 +33,11 @@ App: PWA im GitHub-Repo skriptm/IG (GitHub Pages). Reiter: Übersicht, Follower,
 
 ## Verlauf
 
+### 25.11.2026 – v1.18.1 (Auto-Reply: Not-Aus und Tagesgrenze)
+- Apps Script: `MODE = aus` stoppt jeden Lauf sofort (keine Instagram- und Claude-Aufrufe). Höchstens 25 gepostete Antworten pro Tag (`CFG.MAX_PER_DAY`), darüber Status „tageslimit“ im Protokoll, ohne Claude-Aufruf.
+- Notfall: André schreibt im Chat „Stop“ → Claude schaltet die Make-Szenarien ab und setzt die Pause. André stellt im Apps Script `MODE` auf `aus`. Kein Not-Aus-Knopf in der App (bewusst).
+- Betrieb: Zeile Auto-Reply nennt die Tagesgrenze.
+
 ### 25.11.2026 – v1.18.0 (Betrieb: Credits und was wo läuft)
 - Einstellungen → neuer Reiter **Betrieb**: Make-Credits (verbraucht, übrig, Schnitt pro Tag, erlaubt pro Tag bis Reset, Hochrechnung, „reicht“ oder „reicht nicht“), Liste „Läuft über Make“ mit Credits pro Szenario, Liste „Läuft ohne Make“ (Auto-Reply per Apps Script, Sessions im Browser).
 - Liste der Szenarien steht in `CONFIG.runs` und `CONFIG.ownRuns` (config.js).

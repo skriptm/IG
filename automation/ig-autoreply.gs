@@ -5,7 +5,7 @@
  * Skript-Eigenschaften (Projekteinstellungen → Skripteigenschaften), trägt André selbst ein:
  *   ANTHROPIC_KEY  Claude-API-Schlüssel (ig-autoreply)
  *   IG_TOKEN       Meta-Systemnutzer-Token (lauinger-hub)
- *   MODE           draft = nur Entwürfe ins Protokoll (Parallellauf), live = Antworten posten
+ *   MODE           draft = nur Entwürfe ins Protokoll (Parallellauf), live = Antworten posten, aus = Not-Aus (tut nichts)
  * Einmalig ausführen: test(), danach setup() (legt den 5-Minuten-Zeitplan an).
  * Protokoll: Google Sheet „IG Auto-Reply Protokoll“ (wird beim ersten Lauf angelegt).
  */
@@ -16,6 +16,7 @@ const CFG = {
   MIN_AGE_MIN: 4,      // erst antworten, wenn der Kommentar so alt ist (wirkt nicht wie ein Bot)
   MAX_AGE_H: 24,       // ältere Kommentare nie automatisch beantworten
   DAY_FROM: 730, DAY_TO: 2130,
+  MAX_PER_DAY: 25,     // Sicherung: höchstens so viele gepostete Antworten pro Tag
   MODEL: 'claude-sonnet-5-5',
   OWN: ['andrelauinger', 'vanandventure']
 };
@@ -23,11 +24,12 @@ const P = PropertiesService.getScriptProperties();
 
 /* ---------- Hauptlauf (alle 5 Minuten) ---------- */
 function run() {
+  const mode = (P.getProperty('MODE') || 'draft').toLowerCase();
+  if (mode === 'aus') return;                                    // Not-Aus
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(1000)) return;
   try {
-    const mode = (P.getProperty('MODE') || 'draft').toLowerCase();
-    const sheet = logSheet_(), done = doneIds_(sheet);
+    const sheet = logSheet_(), done = doneIds_(sheet), posted = { n: postedToday_(sheet) };
     const counts = JSON.parse(P.getProperty('COUNTS') || '{}'), next = {};
     const media = ig_('/' + CFG.IG_USER + '/media', { fields: 'id,permalink,comments_count', limit: CFG.MEDIA }).data || [];
     media.forEach((m) => {
@@ -38,7 +40,7 @@ function run() {
         if (done.has(c.id)) return;
         const age = (Date.now() - Date.parse(c.timestamp)) / 6e4;
         if (age < CFG.MIN_AGE_MIN) { delete next[m.id]; return; } // beim nächsten Lauf nochmal ansehen
-        const row = handle_(c, age, mode, m.permalink);
+        const row = handle_(c, age, mode, m.permalink, posted);
         if (row) { sheet.appendRow(row); done.add(c.id); }
       });
     });
@@ -47,7 +49,7 @@ function run() {
 }
 
 /* Entscheidet über einen Kommentar und liefert die Protokollzeile (oder null = still überspringen) */
-function handle_(c, ageMin, mode, link) {
+function handle_(c, ageMin, mode, link, posted) {
   const user = String(c.username || '').toLowerCase(), text = String(c.text || '');
   const row = (status, answer) => [new Date(), mode, c.id, '@' + user, text, answer || '', status, link];
   if (CFG.OWN.includes(user)) return null;
@@ -57,12 +59,14 @@ function handle_(c, ageMin, mode, link) {
   if (/send me/i.test(text)) return row('spam');
   const hm = Number(Utilities.formatDate(new Date(), 'Europe/Zurich', 'HHmm'));
   if (hm < CFG.DAY_FROM || hm > CFG.DAY_TO) return row('nacht');
+  if (mode === 'live' && posted.n >= CFG.MAX_PER_DAY) return row('tageslimit');
   let answer;
   try { answer = claude_(text); } catch (e) { return row('fehler', String(e.message).slice(0, 200)); }
   if (answer === 'SKIP') return row('frage');
   if (!answer) return row('unsicher');
   if (mode !== 'live') return row('entwurf', answer);
   try { ig_('/' + c.id + '/replies', { message: answer }, 'post'); } catch (e) { return row('fehler', answer + ' | ' + String(e.message).slice(0, 150)); }
+  posted.n++;
   return row('gepostet', answer);
 }
 
@@ -128,6 +132,12 @@ function logSheet_() {
 function doneIds_(sheet) {
   const n = sheet.getLastRow();
   return new Set(n > 1 ? sheet.getRange(2, 3, n - 1, 1).getValues().map((r) => String(r[0])) : []);
+}
+function postedToday_(sheet) {
+  const n = sheet.getLastRow(), day = (d) => Utilities.formatDate(new Date(d), 'Europe/Zurich', 'yyyy-MM-dd'), today = day(new Date());
+  if (n < 2) return 0;
+  const from = Math.max(2, n - 300);
+  return sheet.getRange(from, 1, n - from + 1, 7).getValues().filter((r) => r[6] === 'gepostet' && day(r[0]) === today).length;
 }
 function key_(name) {
   const v = P.getProperty(name);

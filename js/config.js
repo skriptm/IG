@@ -1,7 +1,7 @@
 /* Grundeinstellungen der App. Der Zugangscode steht bewusst NICHT hier,
    er wird beim ersten Start in der App eingegeben und nur auf dem Gerät gespeichert. */
 window.CONFIG = {
-  version: "1.18.0",
+  version: "1.18.1",
   account: "andrelauinger",
   api: "https://hook.eu2.make.com/vevi8zj183hcicg9lq8rai3oekbok6wq",
   // Ein Aufruf fürs Laden aller Daten (spart Make-Credits), eigener Webhook
@@ -20,7 +20,7 @@ window.CONFIG = {
     { id: 10149203, name: "Kommentare beantworten", when: "auf Knopf" }
   ],
   ownRuns: [
-    { where: "Programm", name: "Auto-Reply", when: "alle 5 Min. · Google Apps Script · Claude max. 5 $/Monat" },
+    { where: "Programm", name: "Auto-Reply", when: "alle 5 Min. · Google Apps Script · max. 25 Antworten/Tag · Claude max. 5 $/Monat" },
     { where: "Browser", name: "Engagement-Sessions", when: "manuell · Windows · Skill" }
   ],
   // Accounts, die nie in Listen auftauchen sollen
